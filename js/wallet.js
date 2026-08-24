@@ -30,7 +30,7 @@ onAuthStateChanged(auth, async (user) => {
             if (userDoc.exists()) {
                 const data = userDoc.data();
                 usernameDisplay.textContent = data.username || "User";
-                gemAmountDisplay.textContent = data.gems || 0;
+                gemAmountDisplay.textContent = data.walletGems || 0;
                 gemStreakDisplay.textContent = data.gemStreak || 0;
                 messagesSentDisplay.textContent = data.messagesSent || 0;
             } else {
