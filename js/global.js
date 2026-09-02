@@ -3,13 +3,13 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDWnr-9qpfzW_y-LMuTorItQTUHJVvhLDk",
-  authDomain: "revolt-chat-4fada.firebaseapp.com",
-  databaseURL: "https://revolt-chat-4fada-default-rtdb.firebaseio.com/",
-  projectId: "revolt-chat-4fada",
-  storageBucket: "revolt-chat-4fada.firebasestorage.app",
-  messagingSenderId: "488624788181",
-  appId: "1:488624788181:web:1571ba31aafb8c1441c85c"
+    apiKey: "AIzaSyDWnr-9qpfzW_y-LMuTorItQTUHJVvhLDk",
+    authDomain: "revolt-chat-4fada.firebaseapp.com",
+    databaseURL: "https://revolt-chat-4fada-default-rtdb.firebaseio.com/",
+    projectId: "revolt-chat-4fada",
+    storageBucket: "revolt-chat-4fada.firebasestorage.app",
+    messagingSenderId: "488624788181",
+    appId: "1:488624788181:web:1571ba31aafb8c1441c85c"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -104,6 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadParticles('on');
             }
         } else {
+            if (window.location.pathname.includes('/html/')) {
+                window.location.replace('../index.html');
+            }
             loadParticles('on');
         }
         hideLoading();
