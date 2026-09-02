@@ -47,7 +47,7 @@ onAuthStateChanged(auth, async (user) => {
             
             if (!userDoc.exists()) {
                 await signOut(auth);
-                window.location.href = "../index.html";
+                window.location.replace("../index.html");
                 return; 
             }
             
@@ -64,7 +64,7 @@ onAuthStateChanged(auth, async (user) => {
         loadMessages(currentRoom);
         loadRevolters();
     } else {
-        window.location.href = "../index.html";
+        window.location.replace("../index.html");
     }
 });
 
@@ -181,12 +181,19 @@ if (logoutBtn) {
     logoutBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         if (currentUser) {
-            await updateDoc(doc(db, "users", currentUser.uid), {
-                status: "offline"
-            });
+            try {
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    status: "offline"
+                });
+            } catch (error) {
+                console.error(error);
+            }
         }
+        
         signOut(auth).then(() => {
-            window.location.href = "../index.html";
+            window.location.replace("../index.html");
+        }).catch((error) => {
+            console.error(error);
         });
     });
 }
