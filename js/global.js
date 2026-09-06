@@ -26,9 +26,7 @@ function loadParticles(status) {
     }
     pDiv.innerHTML = '';
 
-    if (status === 'off') {
-        return;
-    }
+    if (status === 'off') return;
 
     const rootStyles = getComputedStyle(document.body);
     let particleColor = rootStyles.getPropertyValue('--particle-hex').trim().replace(/['"]/g, '');
@@ -77,7 +75,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     onAuthStateChanged(auth, async (user) => {
+        const isInHtmlFolder = window.location.pathname.includes('/html/');
+
         if (user) {
+            if (!isInHtmlFolder) {
+                window.location.replace('html/home.html');
+                return;
+            }
+
             try {
                 const userRef = doc(db, "users", user.uid);
                 const docSnap = await getDoc(userRef);
@@ -87,16 +92,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     if (data.theme) {
                         localStorage.setItem('revolt_theme', data.theme);
-                        if (data.theme !== 'default') {
-                            document.documentElement.className = `theme-${data.theme}`;
-                        } else {
-                            document.documentElement.className = '';
-                        }
+                        document.documentElement.className = data.theme !== 'default' ? `theme-${data.theme}` : '';
                     }
                     
-                    setTimeout(() => {
-                        loadParticles(data.particles);
-                    }, 50);
+                    setTimeout(() => loadParticles(data.particles), 50);
                 } else {
                     loadParticles('on');
                 }
@@ -104,8 +103,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadParticles('on');
             }
         } else {
-            if (window.location.pathname.includes('/html/')) {
+            if (isInHtmlFolder) {
                 window.location.replace('../index.html');
+                return;
             }
             loadParticles('on');
         }
@@ -138,7 +138,5 @@ window.showNotification = function(message) {
     popup.textContent = message;
     popup.style.opacity = '1';
     
-    setTimeout(() => {
-        popup.style.opacity = '0';
-    }, 3000);
+    setTimeout(() => popup.style.opacity = '0', 3000);
 };
