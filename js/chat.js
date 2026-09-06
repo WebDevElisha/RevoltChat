@@ -44,15 +44,15 @@ onAuthStateChanged(auth, async (user) => {
         try {
             const userDoc = await getDoc(doc(db, "users", user.uid));
             
-            if (!userDoc.exists()) {
-                await signOut(auth);
-                return; 
+            if (userDoc.exists()) {
+                currentUsername = userDoc.data().username || "User";
+            } else {
+                currentUsername = user.email ? user.email.split('@')[0] : "User";
             }
             
-            currentUsername = userDoc.data().username || "Unknown User";
-            
             await updateDoc(doc(db, "users", user.uid), {
-                status: "online"
+                status: "online",
+                username: currentUsername
             });
             
         } catch (e) {
@@ -93,11 +93,11 @@ function loadRevolters() {
             count++;
             const userData = docSnap.data();
             const li = document.createElement('li');
-            li.innerHTML = `<i data-lucide="user" size="16" style="color: var(--border-color);"></i> <span>${userData.username || "Unknown"}</span>`;
+            li.innerHTML = `<i data-lucide="user" size="16" style="color: var(--border-color);"></i> <span>${userData.username || "User"}</span>`;
             revoltUsersList.appendChild(li);
         });
         userCountSpan.textContent = count;
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     });
 }
 
@@ -127,7 +127,7 @@ function loadMessages(room) {
             messageDiv.className = `message ${isSentByMe ? 'sent' : 'received'}`;
             messageDiv.innerHTML = `
                 <div class="message-info">
-                    <span class="sender-id">${data.username || "Anonymous"}</span>
+                    <span class="sender-id">${data.username || "User"}</span>
                 </div>
                 <div class="message-text">${data.text || ""}</div>
             `;
