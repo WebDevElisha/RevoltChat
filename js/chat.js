@@ -1,6 +1,6 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, where, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, where, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDWnr-9qpfzW_y-LMuTorItQTUHJVvhLDk",
@@ -35,7 +35,7 @@ window.addEventListener('beforeunload', () => {
     if (currentUser) {
         updateDoc(doc(db, "users", currentUser.uid), {
             status: "offline"
-        }).catch(err => console.log(err));
+        }).catch(() => {});
     }
 });
 
@@ -47,11 +47,10 @@ onAuthStateChanged(auth, async (user) => {
             
             if (!userDoc.exists()) {
                 await signOut(auth);
-                window.location.replace("../index.html");
                 return; 
             }
             
-            currentUsername = userDoc.data().username || "User";
+            currentUsername = userDoc.data().username || "Unknown User";
             
             await updateDoc(doc(db, "users", user.uid), {
                 status: "online"
@@ -64,7 +63,10 @@ onAuthStateChanged(auth, async (user) => {
         loadMessages(currentRoom);
         loadRevolters();
     } else {
-        window.location.replace("../index.html");
+        currentUser = null;
+        if (window.location.pathname.includes('/html/')) {
+            window.location.replace("../index.html");
+        }
     }
 });
 
@@ -74,17 +76,15 @@ roomElements.forEach(room => {
         const selected = e.currentTarget;
         selected.classList.add('active');
         currentRoom = selected.getAttribute('data-room');
-        loadMessages(currentRoom);
+        if (currentUser) loadMessages(currentRoom);
     });
 });
 
 function loadRevolters() {
     if (usersUnsubscribe) usersUnsubscribe();
+    if (!currentUser) return;
     
-    const q = query(
-        collection(db, "users"),
-        where("status", "==", "online")
-    );
+    const q = query(collection(db, "users"), where("status", "==", "online"));
     
     usersUnsubscribe = onSnapshot(q, (snapshot) => {
         revoltUsersList.innerHTML = '';
@@ -93,7 +93,7 @@ function loadRevolters() {
             count++;
             const userData = docSnap.data();
             const li = document.createElement('li');
-            li.innerHTML = `<i data-lucide="user" size="16" style="color: var(--border-color);"></i> <span>${userData.username || "User"}</span>`;
+            li.innerHTML = `<i data-lucide="user" size="16" style="color: var(--border-color);"></i> <span>${userData.username || "Unknown"}</span>`;
             revoltUsersList.appendChild(li);
         });
         userCountSpan.textContent = count;
@@ -103,20 +103,16 @@ function loadRevolters() {
 
 function loadMessages(room) {
     if (unsubscribe) unsubscribe();
-    messagesContainer.innerHTML = '';
+    if (!currentUser) return;
     
-    const q = query(
-        collection(db, "messages"), 
-        where("room", "==", room)
-    );
+    messagesContainer.innerHTML = '';
+    const q = query(collection(db, "messages"), where("room", "==", room));
 
     unsubscribe = onSnapshot(q, (snapshot) => {
         messagesContainer.innerHTML = '';
         const docs = [];
         
-        snapshot.forEach((docSnap) => {
-            docs.push(docSnap.data());
-        });
+        snapshot.forEach((docSnap) => docs.push(docSnap.data()));
 
         docs.sort((a, b) => {
             const timeA = a.createdAt ? a.createdAt.toMillis() : Date.now();
@@ -138,8 +134,6 @@ function loadMessages(room) {
             messagesContainer.appendChild(messageDiv);
         });
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }, (error) => {
-        console.error(error);
     });
 }
 
@@ -159,7 +153,6 @@ async function sendMessage() {
         });
     } catch (error) {
         console.error(error);
-        alert("Failed to send message: " + error.message);
     }
 }
 
@@ -180,6 +173,8 @@ if (sendButton) {
 if (logoutBtn) {
     logoutBtn.addEventListener('click', async (e) => {
         e.preventDefault();
+        logoutBtn.style.pointerEvents = 'none';
+        
         if (currentUser) {
             try {
                 await updateDoc(doc(db, "users", currentUser.uid), {
@@ -190,10 +185,11 @@ if (logoutBtn) {
             }
         }
         
-        signOut(auth).then(() => {
-            window.location.replace("../index.html");
-        }).catch((error) => {
+        try {
+            await signOut(auth);
+        } catch (error) {
             console.error(error);
-        });
+            logoutBtn.style.pointerEvents = 'auto';
+        }
     });
 }
