@@ -3,62 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revolt - Wallet</title>
-    <script>
-        const savedTheme = localStorage.getItem('revolt_theme');
-        if (savedTheme && savedTheme !== 'default') {
-            document.documentElement.className = `theme-${savedTheme}`;
-        }
-    </script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="../css/style.css">
+    <title>Revolt Chat - Wallet</title>
+    <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/wallet.css">
 </head>
 <body>
+    <div id="loading-screen"></div>
     <div id="particles-js"></div>
-    
-    <nav class="navbar">
-        <a href="../home.html" class="back-btn">
-            <i data-lucide="arrow-left"></i>
-        </a>
-        <span class="nav-title theme-text">WALLET</span>
-        <div style="width: 42px;"></div>
-    </nav>
 
     <div class="wallet-wrapper">
-        <h1 id="wallet-username" class="theme-text">...</h1>
-        
-        <div class="stats-grid">
-            <div class="stat-box">
-                <div class="icon-wrapper">
-                    <i data-lucide="gem" size="36"></i>
-                </div>
-                <h3>Gem Amount</h3>
-                <span id="gem-amount" class="stat-value">0</span>
-            </div>
-            
-            <div class="stat-box">
-                <div class="icon-wrapper">
-                    <i data-lucide="flame" size="36"></i>
-                </div>
-                <h3>Gem Streak</h3>
-                <span id="gem-streak" class="stat-value">0</span>
-            </div>
-            
-            <div class="stat-box">
-                <div class="icon-wrapper">
-                    <i data-lucide="message-square" size="36"></i>
-                </div>
-                <h3>Messages Sent</h3>
-                <span id="messages-sent" class="stat-value">0</span>
-            </div>
+        <h2 id="wallet-username">Loading...</h2>
+        <div class="wallet-gem-box">
+            <h3>Gems</h3>
+            <div id="gem-count">0</div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script>
-        lucide.createIcons();
-    </script>
+    <script type="module" src="../js/global.js"></script>
     <script type="module" src="../js/wallet.js"></script>
 </body>
 </html>
