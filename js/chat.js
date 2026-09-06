@@ -21,7 +21,6 @@ const messageInput = document.getElementById('message-input');
 const sendButton = document.getElementById('send-button');
 const messagesContainer = document.getElementById('messages-container');
 const roomElements = document.querySelectorAll('.room');
-const logoutBtn = document.getElementById('logout-btn');
 const revoltUsersList = document.getElementById('revolt-users-list');
 const userCountSpan = document.getElementById('user-count');
 
@@ -167,29 +166,5 @@ if (sendButton) {
     sendButton.addEventListener('click', (e) => {
         e.preventDefault();
         sendMessage();
-    });
-}
-
-if (logoutBtn) {
-    logoutBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        logoutBtn.style.pointerEvents = 'none';
-        
-        if (currentUser) {
-            try {
-                await updateDoc(doc(db, "users", currentUser.uid), {
-                    status: "offline"
-                });
-            } catch (error) {
-                console.error(error);
-            }
-        }
-        
-        try {
-            await signOut(auth);
-        } catch (error) {
-            console.error(error);
-            logoutBtn.style.pointerEvents = 'auto';
-        }
     });
 }
