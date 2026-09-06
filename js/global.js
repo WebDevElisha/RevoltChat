@@ -99,11 +99,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     onAuthStateChanged(auth, async (user) => {
-        const isInHtmlFolder = window.location.pathname.includes('/html/');
+        const path = window.location.pathname;
+        const isIndexPage = path.endsWith('/') || path.endsWith('/index.html');
 
         if (user) {
-            if (!isInHtmlFolder) {
-                window.location.replace('html/home.html');
+            if (isIndexPage) {
+                window.location.replace('home.html');
                 return;
             }
 
@@ -127,8 +128,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadParticles('on');
             }
         } else {
-            if (isInHtmlFolder) {
-                window.location.replace('../index.html');
+            if (!isIndexPage) {
+                window.location.replace('index.html');
                 return;
             }
             loadParticles('on');
