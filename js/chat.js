@@ -63,8 +63,9 @@ onAuthStateChanged(auth, async (user) => {
         loadRevolters();
     } else {
         currentUser = null;
-        if (window.location.pathname.includes('/html/')) {
-            window.location.replace("../index.html");
+        const path = window.location.pathname;
+        if (!path.endsWith('/') && !path.endsWith('/index.html')) {
+            window.location.replace("index.html");
         }
     }
 });
