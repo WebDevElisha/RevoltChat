@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, where, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -25,7 +25,7 @@ const revoltUsersList = document.getElementById('revolt-users-list');
 const userCountSpan = document.getElementById('user-count');
 
 let currentUser = null;
-let currentUsername = "Unknown User";
+let currentUsername = null;
 let currentRoom = "General";
 let unsubscribe = null;
 let usersUnsubscribe = null;
@@ -44,10 +44,12 @@ onAuthStateChanged(auth, async (user) => {
         try {
             const userDoc = await getDoc(doc(db, "users", user.uid));
             
-            if (userDoc.exists()) {
-                currentUsername = userDoc.data().username || "User";
+            if (userDoc.exists() && userDoc.data().username) {
+                currentUsername = userDoc.data().username;
+            } else if (user.email) {
+                currentUsername = user.email.split('@')[0];
             } else {
-                currentUsername = user.email ? user.email.split('@')[0] : "User";
+                currentUsername = "Revolter";
             }
             
             await updateDoc(doc(db, "users", user.uid), {
@@ -56,7 +58,7 @@ onAuthStateChanged(auth, async (user) => {
             });
             
         } catch (e) {
-            console.error(e);
+            currentUsername = user.email ? user.email.split('@')[0] : "Revolter";
         }
         
         loadMessages(currentRoom);
@@ -87,15 +89,19 @@ function loadRevolters() {
     const q = query(collection(db, "users"), where("status", "==", "online"));
     
     usersUnsubscribe = onSnapshot(q, (snapshot) => {
+        if (!revoltUsersList || !userCountSpan) return;
         revoltUsersList.innerHTML = '';
         let count = 0;
+        
         snapshot.forEach((docSnap) => {
             count++;
             const userData = docSnap.data();
+            const displayName = userData.username || (userData.email ? userData.email.split('@')[0] : "Revolter");
             const li = document.createElement('li');
-            li.innerHTML = `<i data-lucide="user" size="16" style="color: var(--border-color);"></i> <span>${userData.username || "User"}</span>`;
+            li.innerHTML = `<i data-lucide="user" size="16" style="color: var(--border-color);"></i> <span>${displayName}</span>`;
             revoltUsersList.appendChild(li);
         });
+        
         userCountSpan.textContent = count;
         if (typeof lucide !== 'undefined') lucide.createIcons();
     });
@@ -123,11 +129,12 @@ function loadMessages(room) {
         docs.forEach((data) => {
             const messageDiv = document.createElement('div');
             const isSentByMe = currentUser && data.uid === currentUser.uid;
+            const senderName = data.username || "Revolter";
             
             messageDiv.className = `message ${isSentByMe ? 'sent' : 'received'}`;
             messageDiv.innerHTML = `
                 <div class="message-info">
-                    <span class="sender-id">${data.username || "User"}</span>
+                    <span class="sender-id">${senderName}</span>
                 </div>
                 <div class="message-text">${data.text || ""}</div>
             `;
@@ -148,7 +155,7 @@ async function sendMessage() {
             text: text,
             room: currentRoom,
             uid: currentUser.uid,
-            username: currentUsername,
+            username: currentUsername || "Revolter",
             createdAt: serverTimestamp()
         });
     } catch (error) {
