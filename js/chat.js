@@ -46,9 +46,6 @@ onAuthStateChanged(auth, async (user) => {
             
             if (userDoc.exists() && userDoc.data().username) {
                 currentUsername = userDoc.data().username;
-            } else {
-                console.error("No username found in database for this user UID.");
-                currentUsername = "User_" + user.uid.slice(0, 5);
             }
             
             await updateDoc(doc(db, "users", user.uid), {
@@ -66,7 +63,7 @@ onAuthStateChanged(auth, async (user) => {
         currentUser = null;
         const path = window.location.pathname;
         if (!path.endsWith('/') && !path.endsWith('/index.html')) {
-            window.location.replace("index.html");
+            window.location.replace("../index.html");
         }
     }
 });
@@ -95,7 +92,7 @@ function loadRevolters() {
         snapshot.forEach((docSnap) => {
             count++;
             const userData = docSnap.data();
-            const displayName = userData.username || "Anonymous";
+            const displayName = userData.username || "Loading...";
             const li = document.createElement('li');
             li.innerHTML = `<i data-lucide="user" size="16" style="color: var(--border-color);"></i> <span>${displayName}</span>`;
             revoltUsersList.appendChild(li);
@@ -104,7 +101,7 @@ function loadRevolters() {
         userCountSpan.textContent = count;
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }, (error) => {
-        console.error("Revolt counter error:", error);
+        console.error("Revolt Counter Error:", error);
     });
 }
 
@@ -130,7 +127,7 @@ function loadMessages(room) {
         docs.forEach((data) => {
             const messageDiv = document.createElement('div');
             const isSentByMe = currentUser && data.uid === currentUser.uid;
-            const senderName = data.username || "User";
+            const senderName = data.username || "Unknown";
             
             messageDiv.className = `message ${isSentByMe ? 'sent' : 'received'}`;
             messageDiv.innerHTML = `
