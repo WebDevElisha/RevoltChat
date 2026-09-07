@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REVOLT - Profile</title>
+    <link rel="stylesheet" href="../css/profile.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="../home.html" class="back-btn"><i data-lucide="arrow-left" size="20"></i></a>
+        </div>
+        <div class="nav-title">PROFILE</div>
+        <div style="width: 40px;"></div>
+    </nav>
+
+    <div class="main-container">
+        <div class="profile-card">
+            <div class="banner-container" id="banner-bg">
+                <label for="banner-upload" id="banner-btn" class="upload-btn" style="display: none;">
+                    <i data-lucide="image" size="20"></i>
+                </label>
+                <input type="file" id="banner-upload" accept="image/png, image/jpeg" hidden>
+            </div>
+            
+            <div class="avatar-wrapper">
+                <div class="avatar-container">
+                    <div id="avatar-img" style="background-image: url('../Revoltchat.png');"></div>
+                    <label for="avatar-upload" id="avatar-btn" class="upload-btn" style="display: none;">
+                        <i data-lucide="camera" size="16"></i>
+                    </label>
+                    <input type="file" id="avatar-upload" accept="image/png, image/jpeg" hidden>
+                </div>
+            </div>
+
+            <div class="profile-info">
+                <h1 id="display-username">Loading...</h1>
+                <span class="status-badge" id="display-status">Basic</span>
+                
+                <div class="bio-section">
+                    <textarea id="bio-input" maxlength="50" placeholder="Write a brief description about yourself here... (Max 50 characters)"></textarea>
+                    <button id="save-bio-btn">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-card">
+            <div class="stat-box">
+                <i data-lucide="message-square" size="24" class="stat-icon"></i>
+                <div class="stat-data">
+                    <span class="stat-value" id="stat-messages">0</span>
+                    <span class="stat-label">Messages Sent</span>
+                </div>
+            </div>
+            <div class="stat-box">
+                <i data-lucide="gem" size="24" class="stat-icon"></i>
+                <div class="stat-data">
+                    <span class="stat-value" id="stat-gems">0</span>
+                    <span class="stat-label">Gems Collected</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../js/profile.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
