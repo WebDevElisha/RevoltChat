@@ -41,42 +41,66 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
+function renderProfileData(data, email) {
+    displayUsername.textContent = data.username || email.split('@')[0];
+    statGems.textContent = data.gems || 0;
+    bioInput.value = data.bio || "";
+    displayStatus.textContent = data.statusLevel || "Basic";
+
+    if (data.bannerUrl) {
+        bannerBg.style.backgroundImage = `url(${data.bannerUrl})`;
+    }
+    if (data.pfpUrl) {
+        avatarImg.style.backgroundImage = `url(${data.pfpUrl})`;
+    } else {
+        avatarImg.style.backgroundImage = `url('../Revoltchat.png')`;
+    }
+
+    if (!data.bannerChanged || data.statusLevel === "Premium") {
+        bannerBtn.style.display = "flex";
+    }
+    if (!data.pfpChanged || data.statusLevel === "Premium") {
+        avatarBtn.style.display = "flex";
+    }
+}
+
 async function loadUserProfile() {
     try {
+        const cacheKey = `revolt_profile_${currentUser.uid}`;
+        const cachedData = sessionStorage.getItem(cacheKey);
+
+        if (cachedData) {
+            renderProfileData(JSON.parse(cachedData), currentUser.email);
+            return;
+        }
+
         const userRef = doc(db, "users", currentUser.uid);
         const docSnap = await getDoc(userRef);
 
         if (docSnap.exists()) {
             const data = docSnap.data();
-            displayUsername.textContent = data.username || currentUser.email.split('@')[0];
-            statGems.textContent = data.gems || 0;
-            bioInput.value = data.bio || "";
-            displayStatus.textContent = data.statusLevel || "Basic";
-
-            if (data.bannerUrl) {
-                bannerBg.style.backgroundImage = `url(${data.bannerUrl})`;
-            }
-            if (data.pfpUrl) {
-                avatarImg.style.backgroundImage = `url(${data.pfpUrl})`;
-            } else {
-                avatarImg.style.backgroundImage = `url('../Revoltchat.png')`;
-            }
-
-            if (!data.bannerChanged || data.statusLevel === "Premium") {
-                bannerBtn.style.display = "flex";
-            }
-            if (!data.pfpChanged || data.statusLevel === "Premium") {
-                avatarBtn.style.display = "flex";
-            }
+            sessionStorage.setItem(cacheKey, JSON.stringify(data));
+            renderProfileData(data, currentUser.email);
         }
     } catch (e) {}
 }
 
 async function loadMessageCount() {
     try {
+        const cacheKey = `revolt_msg_count_${currentUser.uid}`;
+        const cachedCount = sessionStorage.getItem(cacheKey);
+
+        if (cachedCount !== null) {
+            statMessages.textContent = cachedCount;
+            return;
+        }
+
         const q = query(collection(db, "messages"), where("uid", "==", currentUser.uid));
         const snapshot = await getCountFromServer(q);
-        statMessages.textContent = snapshot.data().count;
+        const count = snapshot.data().count;
+
+        sessionStorage.setItem(cacheKey, count);
+        statMessages.textContent = count;
     } catch (e) {}
 }
 
@@ -88,6 +112,15 @@ saveBioBtn.addEventListener('click', async () => {
         await updateDoc(doc(db, "users", currentUser.uid), {
             bio: newBio
         });
+        
+        const cacheKey = `revolt_profile_${currentUser.uid}`;
+        const cachedData = sessionStorage.getItem(cacheKey);
+        if (cachedData) {
+            const parsed = JSON.parse(cachedData);
+            parsed.bio = newBio;
+            sessionStorage.setItem(cacheKey, JSON.stringify(parsed));
+        }
+
         saveBioBtn.textContent = "Saved!";
         setTimeout(() => saveBioBtn.textContent = "Save", 2000);
     } catch (e) {}
@@ -134,6 +167,16 @@ bannerUpload.addEventListener('change', async (e) => {
             bannerUrl: base64Img,
             bannerChanged: true
         });
+
+        const cacheKey = `revolt_profile_${currentUser.uid}`;
+        const cachedData = sessionStorage.getItem(cacheKey);
+        if (cachedData) {
+            const parsed = JSON.parse(cachedData);
+            parsed.bannerUrl = base64Img;
+            parsed.bannerChanged = true;
+            sessionStorage.setItem(cacheKey, JSON.stringify(parsed));
+        }
+
         bannerBg.style.backgroundImage = `url(${base64Img})`;
         bannerBtn.style.display = "none";
     } catch (err) {}
@@ -149,6 +192,16 @@ avatarUpload.addEventListener('change', async (e) => {
             pfpUrl: base64Img,
             pfpChanged: true
         });
+
+        const cacheKey = `revolt_profile_${currentUser.uid}`;
+        const cachedData = sessionStorage.getItem(cacheKey);
+        if (cachedData) {
+            const parsed = JSON.parse(cachedData);
+            parsed.pfpUrl = base64Img;
+            parsed.pfpChanged = true;
+            sessionStorage.setItem(cacheKey, JSON.stringify(parsed));
+        }
+
         avatarImg.style.backgroundImage = `url(${base64Img})`;
         avatarBtn.style.display = "none";
     } catch (err) {}
