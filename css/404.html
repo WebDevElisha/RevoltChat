@@ -97,7 +97,7 @@
     <div class="error-container">
         <h1 class="error-code">404</h1>
         <p class="error-message">Sorry, the page you are trying to access isn't owned by Revolt, or has been moved temporary to a new address.</p>
-        <a href="index.html" id="auth-link" class="error-link">Login, or Signup</a>
+        <a href="/index.html" id="auth-link" class="error-link">Login, or Signup</a>
     </div>
 
     <script type="module">
@@ -120,10 +120,10 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                authLink.href = "home.html";
+                authLink.href = "/home.html";
                 authLink.textContent = "Back to Home";
             } else {
-                authLink.href = "index.html";
+                authLink.href = "/index.html";
                 authLink.textContent = "Login, or Signup";
             }
         });
