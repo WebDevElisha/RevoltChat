@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDWnr-9qpfzW_y-LMuTorItQTUHJVvhLDk",
@@ -72,30 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingScreen.style.opacity = '0';
             setTimeout(() => loadingScreen.style.display = 'none', 500);
         }
-    }
-
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            logoutBtn.style.pointerEvents = 'none';
-            const currentUser = auth.currentUser;
-            if (currentUser) {
-                try {
-                    await updateDoc(doc(db, "users", currentUser.uid), {
-                        status: "offline"
-                    });
-                } catch (error) {
-                    console.error(error);
-                }
-            }
-            try {
-                await signOut(auth);
-            } catch (error) {
-                console.error(error);
-                logoutBtn.style.pointerEvents = 'auto';
-            }
-        });
     }
 
     onAuthStateChanged(auth, async (user) => {
