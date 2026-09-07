@@ -23,16 +23,18 @@ const collectBtn = document.getElementById('collect-btn');
 let currentUid = null;
 let userData = null;
 
-renderBoard(true, 1, true);
+if (daysContainer && collectBtn) {
+    renderBoard(true, 1, true);
 
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    currentUid = user.uid;
-    await loadUserData();
-  } else {
-    signInAnonymously(auth).catch((error) => {});
-  }
-});
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUid = user.uid;
+        await loadUserData();
+      } else {
+        signInAnonymously(auth).catch((error) => {});
+      }
+    });
+}
 
 async function loadUserData() {
   const userRef = doc(db, "users", currentUid);
@@ -79,6 +81,7 @@ function evaluateStreak() {
 }
 
 function renderBoard(canClaim, currentDay, isLoading) {
+  if (!daysContainer || !collectBtn) return;
   daysContainer.innerHTML = '';
   
   rewards.forEach((amt, index) => {
