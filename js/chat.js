@@ -41,9 +41,10 @@ window.addEventListener('beforeunload', () => {
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
+        currentUsername = user.email ? user.email.split('@')[0] : "User";
+        
         try {
             const userDoc = await getDoc(doc(db, "users", user.uid));
-            
             if (userDoc.exists() && userDoc.data().username) {
                 currentUsername = userDoc.data().username;
             }
@@ -52,7 +53,6 @@ onAuthStateChanged(auth, async (user) => {
                 status: "online",
                 username: currentUsername
             });
-            
         } catch (e) {
             console.error("Error fetching user profile:", e);
         }
@@ -92,7 +92,7 @@ function loadRevolters() {
         snapshot.forEach((docSnap) => {
             count++;
             const userData = docSnap.data();
-            const displayName = userData.username || "Loading...";
+            const displayName = userData.username || "User";
             const li = document.createElement('li');
             li.innerHTML = `<i data-lucide="user" size="16" style="color: var(--border-color);"></i> <span>${displayName}</span>`;
             revoltUsersList.appendChild(li);
@@ -127,7 +127,7 @@ function loadMessages(room) {
         docs.forEach((data) => {
             const messageDiv = document.createElement('div');
             const isSentByMe = currentUser && data.uid === currentUser.uid;
-            const senderName = data.username || "Unknown";
+            const senderName = data.username || "User";
             
             messageDiv.className = `message ${isSentByMe ? 'sent' : 'received'}`;
             messageDiv.innerHTML = `
@@ -146,14 +146,14 @@ async function sendMessage() {
     const text = messageInput.value.trim();
     if (!text || !currentUser) return;
     
-    messageInput.value = '';
+    messageInput.value = "";
     
     try {
         await addDoc(collection(db, "messages"), {
             text: text,
             room: currentRoom,
             uid: currentUser.uid,
-            username: currentUsername,
+            username: currentUsername || "User",
             createdAt: serverTimestamp()
         });
     } catch (error) {
