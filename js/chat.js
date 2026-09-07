@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, where, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, where, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDWnr-9qpfzW_y-LMuTorItQTUHJVvhLDk",
@@ -41,20 +41,27 @@ window.addEventListener('beforeunload', () => {
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
-        currentUsername = user.email ? user.email.split('@')[0] : "User";
+        const fallbackName = user.email ? user.email.split('@')[0] : "User";
         
         try {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
+            const userRef = doc(db, "users", user.uid);
+            const userDoc = await getDoc(userRef);
+            
             if (userDoc.exists() && userDoc.data().username) {
                 currentUsername = userDoc.data().username;
+            } else {
+                currentUsername = fallbackName;
             }
             
-            await updateDoc(doc(db, "users", user.uid), {
-                status: "online",
-                username: currentUsername
-            });
+            await setDoc(userRef, {
+                uid: user.uid,
+                email: user.email || "",
+                username: currentUsername,
+                status: "online"
+            }, { merge: true });
+            
         } catch (e) {
-            console.error("Error fetching user profile:", e);
+            currentUsername = fallbackName;
         }
         
         loadMessages(currentRoom);
@@ -92,7 +99,7 @@ function loadRevolters() {
         snapshot.forEach((docSnap) => {
             count++;
             const userData = docSnap.data();
-            const displayName = userData.username || "User";
+            const displayName = userData.username || (userData.email ? userData.email.split('@')[0] : "User");
             const li = document.createElement('li');
             li.innerHTML = `<i data-lucide="user" size="16" style="color: var(--border-color);"></i> <span>${displayName}</span>`;
             revoltUsersList.appendChild(li);
