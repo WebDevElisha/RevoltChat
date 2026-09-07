@@ -25,7 +25,7 @@ const revoltUsersList = document.getElementById('revolt-users-list');
 const userCountSpan = document.getElementById('user-count');
 
 let currentUser = null;
-let currentUsername = null;
+let currentUsername = "";
 let currentRoom = "General";
 let unsubscribe = null;
 let usersUnsubscribe = null;
@@ -46,10 +46,9 @@ onAuthStateChanged(auth, async (user) => {
             
             if (userDoc.exists() && userDoc.data().username) {
                 currentUsername = userDoc.data().username;
-            } else if (user.email) {
-                currentUsername = user.email.split('@')[0];
             } else {
-                currentUsername = "Revolter";
+                console.error("No username found in database for this user UID.");
+                currentUsername = "User_" + user.uid.slice(0, 5);
             }
             
             await updateDoc(doc(db, "users", user.uid), {
@@ -58,7 +57,7 @@ onAuthStateChanged(auth, async (user) => {
             });
             
         } catch (e) {
-            currentUsername = user.email ? user.email.split('@')[0] : "Revolter";
+            console.error("Error fetching user profile:", e);
         }
         
         loadMessages(currentRoom);
@@ -96,7 +95,7 @@ function loadRevolters() {
         snapshot.forEach((docSnap) => {
             count++;
             const userData = docSnap.data();
-            const displayName = userData.username || (userData.email ? userData.email.split('@')[0] : "Revolter");
+            const displayName = userData.username || "Anonymous";
             const li = document.createElement('li');
             li.innerHTML = `<i data-lucide="user" size="16" style="color: var(--border-color);"></i> <span>${displayName}</span>`;
             revoltUsersList.appendChild(li);
@@ -104,6 +103,8 @@ function loadRevolters() {
         
         userCountSpan.textContent = count;
         if (typeof lucide !== 'undefined') lucide.createIcons();
+    }, (error) => {
+        console.error("Revolt counter error:", error);
     });
 }
 
@@ -129,7 +130,7 @@ function loadMessages(room) {
         docs.forEach((data) => {
             const messageDiv = document.createElement('div');
             const isSentByMe = currentUser && data.uid === currentUser.uid;
-            const senderName = data.username || "Revolter";
+            const senderName = data.username || "User";
             
             messageDiv.className = `message ${isSentByMe ? 'sent' : 'received'}`;
             messageDiv.innerHTML = `
@@ -155,7 +156,7 @@ async function sendMessage() {
             text: text,
             room: currentRoom,
             uid: currentUser.uid,
-            username: currentUsername || "Revolter",
+            username: currentUsername,
             createdAt: serverTimestamp()
         });
     } catch (error) {
