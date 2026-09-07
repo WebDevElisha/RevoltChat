@@ -74,6 +74,22 @@
     color: #4caf50;
 }
 
+.gems-cooldown-box, .cooldown-container {
+    background-color: #0a0000;
+    border: 1px solid #e60000;
+    border-radius: 24px;
+    padding: 25px;
+    text-align: center;
+    color: #ffffff;
+    box-shadow: 0 0 10px #e60000, inset 0 0 5px #e60000;
+    font-size: 1rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    margin: 20px auto;
+    max-width: 500px;
+    width: 90%;
+}
+
 @keyframes pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.15); }
