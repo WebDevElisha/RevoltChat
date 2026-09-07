@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -31,7 +31,13 @@ if (daysContainer && collectBtn) {
         currentUid = user.uid;
         await loadUserData();
       } else {
-        signInAnonymously(auth).catch((error) => {});
+        currentUid = null;
+        if (collectBtn) {
+            collectBtn.textContent = 'Log in to collect gems';
+            collectBtn.style.opacity = '0.5';
+            collectBtn.style.cursor = 'not-allowed';
+            collectBtn.onclick = null;
+        }
       }
     });
 }
