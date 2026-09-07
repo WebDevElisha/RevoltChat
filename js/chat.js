@@ -26,9 +26,14 @@ const userCountSpan = document.getElementById('user-count');
 
 let currentUser = null;
 let currentUsername = "";
+let currentPfpUrl = "Revoltchat.png";
 let currentRoom = "General";
 let unsubscribe = null;
 let usersUnsubscribe = null;
+
+if (sendButton) {
+    sendButton.textContent = "R->";
+}
 
 window.addEventListener('beforeunload', () => {
     if (currentUser) {
@@ -47,8 +52,11 @@ onAuthStateChanged(auth, async (user) => {
             const userRef = doc(db, "users", user.uid);
             const userDoc = await getDoc(userRef);
             
-            if (userDoc.exists() && userDoc.data().username) {
-                currentUsername = userDoc.data().username;
+            if (userDoc.exists()) {
+                currentUsername = userDoc.data().username || fallbackName;
+                if (userDoc.data().pfpUrl) {
+                    currentPfpUrl = userDoc.data().pfpUrl;
+                }
             } else {
                 currentUsername = fallbackName;
             }
@@ -70,7 +78,7 @@ onAuthStateChanged(auth, async (user) => {
         currentUser = null;
         const path = window.location.pathname;
         if (!path.endsWith('/') && !path.endsWith('/index.html')) {
-            window.location.replace("../index.html");
+            window.location.replace("index.html");
         }
     }
 });
@@ -107,9 +115,7 @@ function loadRevolters() {
         
         userCountSpan.textContent = count;
         if (typeof lucide !== 'undefined') lucide.createIcons();
-    }, (error) => {
-        console.error("Revolt Counter Error:", error);
-    });
+    }, (error) => {});
 }
 
 function loadMessages(room) {
@@ -132,18 +138,22 @@ function loadMessages(room) {
         });
 
         docs.forEach((data) => {
-            const messageDiv = document.createElement('div');
             const isSentByMe = currentUser && data.uid === currentUser.uid;
             const senderName = data.username || "User";
+            const avatarSrc = data.pfpUrl || "Revoltchat.png";
             
-            messageDiv.className = `message ${isSentByMe ? 'sent' : 'received'}`;
-            messageDiv.innerHTML = `
-                <div class="message-info">
-                    <span class="sender-id">${senderName}</span>
+            const wrapperDiv = document.createElement('div');
+            wrapperDiv.className = `message-wrapper ${isSentByMe ? 'sent-wrapper' : 'received-wrapper'}`;
+            wrapperDiv.innerHTML = `
+                <img src="${avatarSrc}" class="chat-avatar" alt="User">
+                <div class="message ${isSentByMe ? 'sent' : 'received'}">
+                    <div class="message-info">
+                        <span class="sender-id">${senderName}</span>
+                    </div>
+                    <div class="message-text">${data.text || ""}</div>
                 </div>
-                <div class="message-text">${data.text || ""}</div>
             `;
-            messagesContainer.appendChild(messageDiv);
+            messagesContainer.appendChild(wrapperDiv);
         });
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     });
@@ -161,11 +171,10 @@ async function sendMessage() {
             room: currentRoom,
             uid: currentUser.uid,
             username: currentUsername || "User",
+            pfpUrl: currentPfpUrl,
             createdAt: serverTimestamp()
         });
-    } catch (error) {
-        console.error(error);
-    }
+    } catch (error) {}
 }
 
 if (messageForm) {
