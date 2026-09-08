@@ -1,3 +1,4 @@
+/* js/global.js */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
@@ -17,19 +18,20 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 function applyTheme(themeName) {
-    if (themeName && themeName !== 'default') {
+    if (themeName && themeName !== 'default' && themeName !== '') {
         document.documentElement.className = `theme-${themeName}`;
     } else {
         document.documentElement.className = '';
     }
 }
 
-const savedTheme = localStorage.getItem('revolt_theme');
+const savedTheme = localStorage.getItem('revolt_theme') || 'default';
 applyTheme(savedTheme);
 
 window.updateAppTheme = function(themeName) {
-    localStorage.setItem('revolt_theme', themeName);
-    applyTheme(themeName);
+    const finalTheme = themeName || 'default';
+    localStorage.setItem('revolt_theme', finalTheme);
+    applyTheme(finalTheme);
     loadParticles('on');
 };
 
@@ -84,7 +86,7 @@ function loadParticles(status) {
 document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, async (user) => {
         const path = window.location.pathname;
-        const isIndexPage = path.endsWith('/') || path.endsWith('/index.html');
+        const isIndexPage = path.endsWith('/') || path.endsWith('/index.html') || path.endsWith('index.html');
 
         if (user) {
             if (isIndexPage) {
@@ -98,10 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cachedData) {
                 try {
                     const data = JSON.parse(cachedData);
-                    if (data.theme && data.theme !== savedTheme) {
-                        localStorage.setItem('revolt_theme', data.theme);
-                        applyTheme(data.theme);
-                    }
+                    const userTheme = data.theme || 'default';
+                    localStorage.setItem('revolt_theme', userTheme);
+                    applyTheme(userTheme);
                     setTimeout(() => loadParticles(data.particles || 'on'), 50);
                     return;
                 } catch (e) {}
@@ -114,15 +115,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     sessionStorage.setItem(cacheKey, JSON.stringify(data));
-                    if (data.theme) {
-                        localStorage.setItem('revolt_theme', data.theme);
-                        applyTheme(data.theme);
-                    }
+                    const userTheme = data.theme || 'default';
+                    localStorage.setItem('revolt_theme', userTheme);
+                    applyTheme(userTheme);
                     setTimeout(() => loadParticles(data.particles || 'on'), 50);
                 } else {
+                    applyTheme('default');
                     loadParticles('on');
                 }
             } catch (error) {
+                applyTheme('default');
                 loadParticles('on');
             }
         } else {
@@ -130,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.replace('index.html');
                 return;
             }
+            applyTheme('default');
             loadParticles('on');
         }
     });
