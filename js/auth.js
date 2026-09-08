@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -15,12 +15,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
-onAuthStateChanged(auth, (user) => {
-    if (user && !user.isAnonymous) {
-        window.location.replace("home.html"); 
-    }
-});
 
 const authTitle = document.getElementById('auth-title');
 const authSubtitle = document.getElementById('auth-subtitle');
@@ -95,13 +89,14 @@ authActionBtn.addEventListener('click', async () => {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-           
+            
             await setDoc(doc(db, "users", user.uid), {
                 username: username,
                 email: email,
                 status: "online"
             });
 
+           
             window.location.href = "home.html";
         }
     } catch (error) {
