@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, where, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, where, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { initRevoltCounter, setupPresence } from "./revoltcounter.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDWnr-9qpfzW_y-LMuTorItQTUHJVvhLDk",
@@ -29,22 +30,10 @@ let currentUsername = "";
 let currentPfpUrl = "Revoltchat.png";
 let currentRoom = "General";
 let unsubscribe = null;
-let usersUnsubscribe = null;
 
 if (sendButton) {
     sendButton.textContent = "R->";
 }
-
-function setOfflineStatus() {
-    if (currentUser) {
-        updateDoc(doc(db, "users", currentUser.uid), {
-            status: "offline"
-        }).catch(() => {});
-    }
-}
-
-window.addEventListener('beforeunload', setOfflineStatus);
-window.addEventListener('pagehide', setOfflineStatus);
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -76,8 +65,9 @@ onAuthStateChanged(auth, async (user) => {
             currentUsername = fallbackName;
         }
         
+        setupPresence(db, currentUser);
         loadMessages(currentRoom);
-        loadRevolters();
+        initRevoltCounter(db, currentUser, revoltUsersList, userCountSpan);
     } else {
         currentUser = null;
         const path = window.location.pathname;
@@ -96,31 +86,6 @@ roomElements.forEach(room => {
         if (currentUser) loadMessages(currentRoom);
     });
 });
-
-function loadRevolters() {
-    if (usersUnsubscribe) usersUnsubscribe();
-    if (!currentUser) return;
-    
-    const q = query(collection(db, "users"), where("status", "==", "online"));
-    
-    usersUnsubscribe = onSnapshot(q, (snapshot) => {
-        if (!revoltUsersList || !userCountSpan) return;
-        revoltUsersList.innerHTML = '';
-        let count = 0;
-        
-        snapshot.forEach((docSnap) => {
-            count++;
-            const userData = docSnap.data();
-            const displayName = userData.username || "User";
-            const li = document.createElement('li');
-            li.innerHTML = `<i data-lucide="user" size="16" style="color: var(--border-color);"></i> <span>${displayName}</span>`;
-            revoltUsersList.appendChild(li);
-        });
-        
-        userCountSpan.textContent = count;
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    }, (error) => {});
-}
 
 function loadMessages(room) {
     if (unsubscribe) unsubscribe();
