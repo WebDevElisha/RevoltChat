@@ -47,7 +47,7 @@ async function loadUserData() {
             walletGems: 0,
             gems: 0
         };
-        await setDoc(userRef, userData);
+        await setDoc(userRef, userData, { merge: true });
     }
     
     evaluateStreak();
@@ -105,7 +105,6 @@ function renderBoard(canClaim, currentDay, isLoading) {
             <div class="gem-icon"><i data-lucide="gem" size="32"></i></div>
             <div class="gem-amount">+${amt}</div>
         `;
-        
         daysContainer.appendChild(box);
     });
 
@@ -138,8 +137,8 @@ function renderBoard(canClaim, currentDay, isLoading) {
 
 async function processClaim() {
     const rewardAmount = rewards[userData.gemStreak - 1];
-    userData.walletGems = (userData.walletGems || 0) + rewardAmount;
-    userData.gems = (userData.gems || 0) + rewardAmount;
+    userData.walletGems = (userData.walletGems || userData.gems || 0) + rewardAmount;
+    userData.gems = userData.walletGems;
     userData.lastGemClaim = Date.now();
     
     const userRef = doc(db, "users", currentUid);
@@ -149,6 +148,15 @@ async function processClaim() {
         walletGems: userData.walletGems,
         gems: userData.gems
     });
+
+    const cacheKey = `revolt_profile_${currentUid}`;
+    const cachedData = sessionStorage.getItem(cacheKey);
+    if (cachedData) {
+        const parsed = JSON.parse(cachedData);
+        parsed.gems = userData.gems;
+        parsed.walletGems = userData.walletGems;
+        sessionStorage.setItem(cacheKey, JSON.stringify(parsed));
+    }
     
     renderBoard(false, userData.gemStreak, false);
     
