@@ -22,6 +22,7 @@ function applyTheme(themeName) {
     document.body.className = cleanTheme ? `theme-${cleanTheme}` : '';
 }
 
+// Immediately apply local theme preference to prevent flashing
 const savedTheme = localStorage.getItem('revolt_theme') || 'default';
 applyTheme(savedTheme);
 
@@ -81,18 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const cacheKey = `revolt_profile_${user.uid}`;
-            const cachedData = sessionStorage.getItem(cacheKey);
-
-            if (cachedData) {
-                try {
-                    const data = JSON.parse(cachedData);
-                    const userTheme = data.theme || 'default';
-                    localStorage.setItem('revolt_theme', userTheme);
-                    applyTheme(userTheme);
-                    setTimeout(() => loadParticles(data.particles || 'on'), 50);
-                    return;
-                } catch (e) {}
-            }
+            let activeTheme = localStorage.getItem('revolt_theme');
 
             try {
                 const userRef = doc(db, "users", user.uid);
@@ -101,16 +91,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     sessionStorage.setItem(cacheKey, JSON.stringify(data));
-                    const userTheme = data.theme || 'default';
-                    localStorage.setItem('revolt_theme', userTheme);
-                    applyTheme(userTheme);
+                    
+                    // If localStorage doesn't have it yet, fall back to Firestore profile theme
+                    if (!activeTheme || activeTheme === 'default') {
+                        activeTheme = data.theme || 'default';
+                        localStorage.setItem('revolt_theme', activeTheme);
+                    }
+                    
+                    applyTheme(activeTheme);
                     setTimeout(() => loadParticles(data.particles || 'on'), 50);
                 } else {
-                    applyTheme('default');
+                    applyTheme(activeTheme || 'default');
                     loadParticles('on');
                 }
             } catch (error) {
-                applyTheme('default');
+                applyTheme(activeTheme || 'default');
                 loadParticles('on');
             }
         } else {
@@ -149,6 +144,7 @@ window.showNotification = function(message) {
 };
 
 window.getCachedUserAvatar = function(uid) {
+    const defaultImg = window.location.pathname.includes('/html/') ? "../Revoltchat.png" : "Revoltchat.png";
     const cached = sessionStorage.getItem(`revolt_profile_${uid}`);
     if (cached) {
         try {
@@ -156,5 +152,5 @@ window.getCachedUserAvatar = function(uid) {
             if (data.pfpUrl) return data.pfpUrl;
         } catch(e) {}
     }
-    return 'Revoltchat.png';
+    return defaultImg;
 };
