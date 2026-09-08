@@ -18,7 +18,7 @@
             flex-direction: column;
             align-items: center;
             padding: 20px;
-            height: 100vh;
+            min-height: 100vh;
         }
 
         .settings-container {
@@ -29,9 +29,10 @@
             background: color-mix(in srgb, var(--bg-color) 70%, #000000);
             border: 2px solid var(--border-color);
             border-radius: 10px;
-            padding: 40px;
+            padding: 45px;
             box-shadow: 0 0 20px color-mix(in srgb, var(--border-color) 40%, transparent);
             transition: all 0.3s ease;
+            margin-top: 20px;
         }
 
         h1 {
@@ -53,6 +54,49 @@
             font-size: 1.2rem;
             transition: color 0.3s ease;
         }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .theme-box {
+            height: 90px;
+            border-radius: 8px;
+            border: 2px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .theme-box:hover {
+            transform: scale(1.05);
+        }
+
+        .theme-box.selected {
+            transform: scale(1.05);
+            outline: 3px solid #ffffff;
+        }
+
+        .settings-divider {
+            width: 100%;
+            height: 1px;
+            background-color: color-mix(in srgb, var(--border-color) 40%, transparent);
+            margin: 30px 0 20px 0;
+        }
+
+        .settings-footer-text {
+            text-align: center;
+            color: color-mix(in srgb, var(--border-color) 70%, #ffffff);
+            font-style: italic;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 <body>
@@ -63,25 +107,28 @@
         <h1>Themes</h1>
         
         <div class="theme-grid">
-            <div class="theme-box" data-theme="default" style="background-color: #050000; border-color: #ff0000; color: #ff0000; box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);">
+            <div class="theme-box" data-theme="default" style="background-color: #050000; border-color: #ff0000; color: #ff0000; box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);">
                 Revolt
             </div>
-            <div class="theme-box" data-theme="blue" style="background-color: #000515; border-color: #007bff; color: #007bff; box-shadow: 0 0 15px rgba(0, 123, 255, 0.5);">
+            <div class="theme-box" data-theme="blue" style="background-color: #000515; border-color: #007bff; color: #007bff; box-shadow: 0 0 15px rgba(0, 123, 255, 0.3);">
                 Blue
             </div>
-            <div class="theme-box" data-theme="rose" style="background-color: #15000a; border-color: #ff007f; color: #ff007f; box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);">
+            <div class="theme-box" data-theme="rose" style="background-color: #15000a; border-color: #ff007f; color: #ff007f; box-shadow: 0 0 15px rgba(255, 0, 127, 0.3);">
                 Rose
             </div>
-            <div class="theme-box" data-theme="amber" style="background-color: #150600; border-color: #ff5e00; color: #ff5e00; box-shadow: 0 0 15px rgba(255, 94, 0, 0.5);">
+            <div class="theme-box" data-theme="amber" style="background-color: #150600; border-color: #ff5e00; color: #ff5e00; box-shadow: 0 0 15px rgba(255, 94, 0, 0.3);">
                 Amber
             </div>
-            <div class="theme-box" data-theme="lightning" style="background-color: #151500; border-color: #ffe600; color: #ffe600; box-shadow: 0 0 15px rgba(255, 230, 0, 0.5);">
+            <div class="theme-box" data-theme="lightning" style="background-color: #151500; border-color: #ffe600; color: #ffe600; box-shadow: 0 0 15px rgba(255, 230, 0, 0.3);">
                 Lightning
             </div>
-            <div class="theme-box" data-theme="mystic" style="background: linear-gradient(135deg, #0a0015 40%, #2a005c 100%); border-color: #9d00ff; color: #df99ff; text-shadow: 0 0 5px #9d00ff; box-shadow: 0 0 15px rgba(157, 0, 255, 0.5);">
+            <div class="theme-box" data-theme="mystic" style="background: linear-gradient(135deg, #0a0015 40%, #2a005c 100%); border-color: #9d00ff; color: #df99ff; text-shadow: 0 0 5px #9d00ff; box-shadow: 0 0 15px rgba(157, 0, 255, 0.3);">
                 Mystic
             </div>
         </div>
+
+        <div class="settings-divider"></div>
+        <div class="settings-footer-text">More settings features coming soon</div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
@@ -90,14 +137,37 @@
     </script>
     <script type="module" src="../js/global.js"></script>
     <script type="module">
-        import { getAuth } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-        import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
         
         const auth = getAuth();
         const db = getFirestore();
 
-        document.querySelectorAll('.theme-box').forEach(box => {
+        const themeBoxes = document.querySelectorAll('.theme-box');
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const docSnap = await getDoc(doc(db, "users", user.uid));
+                    if (docSnap.exists() && docSnap.data().theme) {
+                        const currentTheme = docSnap.data().theme;
+                        themeBoxes.forEach(box => {
+                            if (box.getAttribute('data-theme') === currentTheme) {
+                                box.classList.add('selected');
+                            }
+                        });
+                    } else {
+                        document.querySelector('[data-theme="default"]').classList.add('selected');
+                    }
+                } catch(e) {}
+            }
+        });
+
+        themeBoxes.forEach(box => {
             box.addEventListener('click', async () => {
+                themeBoxes.forEach(b => b.classList.remove('selected'));
+                box.classList.add('selected');
+
                 const theme = box.getAttribute('data-theme');
                 localStorage.setItem('revolt_theme', theme);
                 
@@ -108,8 +178,10 @@
                 }
 
                 if (auth.currentUser) {
-                    const userRef = doc(db, "users", auth.currentUser.uid);
-                    await updateDoc(userRef, { theme: theme });
+                    try {
+                        const userRef = doc(db, "users", auth.currentUser.uid);
+                        await updateDoc(userRef, { theme: theme });
+                    } catch (e) {}
                 }
 
                 location.reload();
