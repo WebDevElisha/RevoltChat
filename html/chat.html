@@ -11,15 +11,15 @@
         }
     </script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/chat.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/chat.css">
 </head>
 <body>
     <div id="particles-js"></div>
 
     <div class="navbar">
         <div class="nav-left">
-            <a href="../home.html" class="back-btn">
+            <a href="home.html" class="back-btn">
                 <i data-lucide="arrow-left" size="20"></i>
             </a>
             <div class="nav-title">REVOLT</div>
@@ -34,29 +34,32 @@
     </div>
 
     <div class="main-container">
-        <div id="side-panel">
-            <h2>Rooms</h2>
-            <ul id="online-users-list">
-                <li class="room active" data-room="General">General</li>
-                <li class="room" data-room="Gaming">Gaming</li>
-                <li class="room" data-room="Yap">Yap</li>
-                <li class="room" data-room="GOATS">GOATS</li>
-                <li class="room" data-room="REVOLTERS">REVOLTERS</li>
-            </ul>
+        <div class="sidebar">
+            <div class="rooms-list">
+                <div class="online-header">Rooms</div>
+                <div class="room active" data-room="General"><i data-lucide="hash" size="18"></i> <span>General</span></div>
+                <div class="room" data-room="Gaming"><i data-lucide="gamepad-2" size="18"></i> <span>Gaming</span></div>
+                <div class="room" data-room="Yap"><i data-lucide="message-square" size="18"></i> <span>Yap</span></div>
+                <div class="room" data-room="GOATS"><i data-lucide="trophy" size="18"></i> <span>GOATS</span></div>
+                <div class="room" data-room="REVOLTERS"><i data-lucide="flame" size="18"></i> <span>REVOLTERS</span></div>
+            </div>
         </div>
 
-        <div id="chat-app">
-            <div id="messages-container"></div>
-            <form id="input-container">
-                <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off">
-                <button type="submit" id="send-button">Send</button>
-            </form>
+        <div class="chat-area">
+            <div id="messages-container" class="messages-container"></div>
+            <div class="input-area">
+                <form id="input-container">
+                    <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off">
+                    <button type="submit" id="send-button">Send</button>
+                </form>
+            </div>
         </div>
 
-        <div id="right-panel">
-            <h2>Revolt Counter</h2>
-            <div id="revolt-count-display">Total Users: <span id="user-count">0</span></div>
-            <ul id="revolt-users-list"></ul>
+        <div class="sidebar right-sidebar">
+            <div class="online-users">
+                <div class="online-header">Revolt Counter (<span id="user-count">0</span>)</div>
+                <ul id="revolt-users-list" class="users-list"></ul>
+            </div>
         </div>
     </div>
 
@@ -64,7 +67,7 @@
     <script>
         lucide.createIcons();
     </script>
-    <script type="module" src="../js/chat.js"></script>
-    <script type="module" src="../js/global.js"></script>
+    <script type="module" src="js/chat.js"></script>
+    <script type="module" src="js/global.js"></script>
 </body>
 </html>
