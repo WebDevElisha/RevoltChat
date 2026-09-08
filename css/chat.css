@@ -1,3 +1,8 @@
+:root {
+    --bg-color: #000000;
+    --border-color: #ff1f3d;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -14,10 +19,10 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
-    background-color: color-mix(in srgb, var(--bg-color) 80%, #000);
-    border-bottom: 1px solid var(--border-color);
-    box-shadow: 0 0 15px color-mix(in srgb, var(--border-color) 40%, transparent);
+    padding: 0 20px;
+    background-color: color-mix(in srgb, var(--bg-color) 85%, #000);
+    border-bottom: 2px solid var(--border-color);
+    box-shadow: 0 0 15px color-mix(in srgb, var(--border-color) 30%, transparent);
     z-index: 10;
     height: 60px;
     flex-shrink: 0;
@@ -34,6 +39,11 @@ body {
     display: flex;
     align-items: center;
     text-decoration: none;
+    transition: transform 0.2s;
+}
+
+.back-btn:hover {
+    transform: scale(1.1);
 }
 
 .nav-title {
@@ -65,23 +75,28 @@ body {
     flex: 1;
     height: calc(100vh - 60px);
     overflow: hidden;
-    width: 100%;
+    width: 100vw;
+    background-color: var(--bg-color);
 }
 
+
 .sidebar {
-    width: 260px;
-    min-width: 260px;
-    background-color: color-mix(in srgb, var(--bg-color) 90%, #000);
-    border-right: 1px solid var(--border-color);
+    width: 280px;
+    min-width: 280px;
+    background-color: color-mix(in srgb, var(--bg-color) 92%, #000);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
     height: 100%;
+    z-index: 5;
+}
+
+.left-sidebar {
+    border-right: 2px solid var(--border-color);
 }
 
 .right-sidebar {
-    border-right: none;
-    border-left: 1px solid var(--border-color);
+    border-left: 2px solid var(--border-color);
 }
 
 .rooms-list {
@@ -102,19 +117,21 @@ body {
     font-weight: bold;
     display: flex;
     align-items: center;
-    gap: 10px;
-    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    gap: 12px;
+    transition: all 0.2s ease;
 }
 
 .room:hover {
-    background-color: color-mix(in srgb, var(--border-color) 10%, transparent);
+    background-color: color-mix(in srgb, var(--border-color) 15%, transparent);
     color: #fff;
+    border-color: color-mix(in srgb, var(--border-color) 40%, transparent);
 }
 
 .room.active {
-    background-color: color-mix(in srgb, var(--border-color) 20%, transparent);
+    background-color: color-mix(in srgb, var(--border-color) 25%, transparent);
     border-color: var(--border-color);
     color: var(--border-color);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--border-color) 20%, transparent);
 }
 
 .online-users {
@@ -125,11 +142,12 @@ body {
 }
 
 .online-header {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--border-color);
     margin-bottom: 15px;
     font-weight: bold;
     text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .users-list {
@@ -142,16 +160,17 @@ body {
 }
 
 .users-list li {
-    padding: 8px 10px;
-    background-color: color-mix(in srgb, var(--bg-color) 50%, #000);
-    border: 1px solid color-mix(in srgb, var(--border-color) 30%, transparent);
+    padding: 10px 12px;
+    background-color: color-mix(in srgb, var(--bg-color) 60%, #000);
+    border: 1px solid color-mix(in srgb, var(--border-color) 40%, transparent);
     border-radius: 6px;
-    color: #ccc;
+    color: #ddd;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     font-size: 0.9rem;
 }
+
 
 .chat-area {
     flex: 1;
@@ -184,8 +203,8 @@ body {
 .received-wrapper { align-self: flex-start; }
 
 .chat-avatar {
-    width: 35px;
-    height: 35px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     border: 1px solid var(--border-color);
     background-size: cover;
@@ -199,9 +218,9 @@ body {
     border-radius: 12px;
     word-wrap: break-word;
     border: 1px solid var(--border-color);
-    background-color: color-mix(in srgb, var(--bg-color) 50%, #000);
+    background-color: color-mix(in srgb, var(--bg-color) 70%, #000);
     color: #ffffff;
-    box-shadow: 0 0 10px color-mix(in srgb, var(--border-color) 30%, transparent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--border-color) 20%, transparent);
 }
 
 .sent { border-bottom-right-radius: 2px; }
@@ -220,8 +239,8 @@ body {
 
 .input-area {
     padding: 15px 20px;
-    background-color: color-mix(in srgb, var(--bg-color) 80%, #000);
-    border-top: 1px solid var(--border-color);
+    background-color: color-mix(in srgb, var(--bg-color) 85%, #000);
+    border-top: 2px solid var(--border-color);
     flex-shrink: 0;
 }
 
@@ -243,6 +262,12 @@ body {
     color: #fff;
     font-size: 1rem;
     outline: none;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.8);
+}
+
+#message-input:focus {
+    border-color: var(--border-color);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--border-color) 40%, transparent);
 }
 
 #send-button {
@@ -255,12 +280,13 @@ body {
     cursor: pointer;
     text-transform: uppercase;
     flex-shrink: 0;
-    transition: background-color 0.2s, color 0.2s;
+    transition: all 0.2s ease;
 }
 
 #send-button:hover {
     background-color: var(--border-color);
     color: #000;
+    box-shadow: 0 0 12px var(--border-color);
 }
 
 @media (max-width: 768px) {
