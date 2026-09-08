@@ -6,6 +6,7 @@ export function initRevoltCounter(db, currentUser, revoltUsersList, userCountSpa
     if (usersUnsubscribe) usersUnsubscribe();
     if (!currentUser) return;
     
+    const defaultAvatar = window.location.pathname.includes('/html/') ? "../Revoltchat.png" : "Revoltchat.png";
     const q = query(collection(db, "users"), where("status", "==", "online"));
     
     usersUnsubscribe = onSnapshot(q, (snapshot) => {
@@ -17,8 +18,18 @@ export function initRevoltCounter(db, currentUser, revoltUsersList, userCountSpa
             count++;
             const userData = docSnap.data();
             const displayName = userData.username || "User";
+            const avatarSrc = userData.pfpUrl || defaultAvatar;
+
             const li = document.createElement('li');
-            li.innerHTML = `<i data-lucide="user" size="16" style="color: var(--border-color);"></i> <span>${displayName}</span>`;
+            li.style.display = "flex";
+            li.style.alignItems = "center";
+            li.style.gap = "8px";
+            li.style.marginBottom = "6px";
+            
+            li.innerHTML = `
+                <img src="${avatarSrc}" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);" alt="Avatar">
+                <span>${displayName}</span>
+            `;
             revoltUsersList.appendChild(li);
         });
         
