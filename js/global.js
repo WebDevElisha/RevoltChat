@@ -22,7 +22,7 @@ function applyTheme(themeName) {
     document.body.className = cleanTheme ? `theme-${cleanTheme}` : '';
 }
 
-// Immediately apply local theme preference to prevent flashing
+
 const savedTheme = localStorage.getItem('revolt_theme') || 'default';
 applyTheme(savedTheme);
 
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = docSnap.data();
                     sessionStorage.setItem(cacheKey, JSON.stringify(data));
                     
-                    // If localStorage doesn't have it yet, fall back to Firestore profile theme
+                    
                     if (!activeTheme || activeTheme === 'default') {
                         activeTheme = data.theme || 'default';
                         localStorage.setItem('revolt_theme', activeTheme);
