@@ -52,7 +52,7 @@ function renderProfileData(data, email) {
         if (data.pfpUrl) {
             avatarImg.style.backgroundImage = `url(${data.pfpUrl})`;
         } else {
-            avatarImg.style.backgroundImage = `url('../Revoltchat.png')`;
+            avatarImg.style.backgroundImage = `url('Revoltchat.png')`;
         }
     }
 }
