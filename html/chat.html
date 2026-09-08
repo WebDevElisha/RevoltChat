@@ -11,15 +11,15 @@
         }
     </script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/chat.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/chat.css">
 </head>
 <body>
     <div id="particles-js"></div>
 
     <div class="navbar">
         <div class="nav-left">
-            <a href="home.html" class="back-btn">
+            <a href="../home.html" class="back-btn">
                 <i data-lucide="arrow-left" size="20"></i>
             </a>
             <div class="nav-title">REVOLT</div>
@@ -34,7 +34,8 @@
     </div>
 
     <div class="main-container">
-        <div class="sidebar">
+        
+        <div class="sidebar left-sidebar">
             <div class="rooms-list">
                 <div class="online-header">Rooms</div>
                 <div class="room active" data-room="General"><i data-lucide="hash" size="18"></i> <span>General</span></div>
@@ -45,6 +46,7 @@
             </div>
         </div>
 
+        
         <div class="chat-area">
             <div id="messages-container" class="messages-container"></div>
             <div class="input-area">
@@ -55,6 +57,7 @@
             </div>
         </div>
 
+       
         <div class="sidebar right-sidebar">
             <div class="online-users">
                 <div class="online-header">Revolt Counter (<span id="user-count">0</span>)</div>
@@ -67,7 +70,7 @@
     <script>
         lucide.createIcons();
     </script>
-    <script type="module" src="js/chat.js"></script>
-    <script type="module" src="js/global.js"></script>
+    <script type="module" src="../js/chat.js"></script>
+    <script type="module" src="../js/global.js"></script>
 </body>
 </html>
