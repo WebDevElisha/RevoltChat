@@ -25,9 +25,11 @@ const roomElements = document.querySelectorAll('.room');
 const revoltUsersList = document.getElementById('revolt-users-list');
 const userCountSpan = document.getElementById('user-count');
 
+const defaultAvatar = window.location.pathname.includes('/html/') ? "../Revoltchat.png" : "Revoltchat.png";
+
 let currentUser = null;
 let currentUsername = "";
-let currentPfpUrl = "Revoltchat.png";
+let currentPfpUrl = defaultAvatar;
 let currentRoom = "General";
 let unsubscribe = null;
 
@@ -109,7 +111,7 @@ function loadMessages(room) {
         docs.forEach((data) => {
             const isSentByMe = currentUser && data.uid === currentUser.uid;
             const senderName = data.username || "User";
-            const avatarSrc = data.pfpUrl || "Revoltchat.png";
+            const avatarSrc = data.pfpUrl || defaultAvatar;
             
             const wrapperDiv = document.createElement('div');
             wrapperDiv.className = `message-wrapper ${isSentByMe ? 'sent-wrapper' : 'received-wrapper'}`;
