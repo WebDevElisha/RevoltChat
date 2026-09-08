@@ -20,8 +20,6 @@ const bannerBg = document.getElementById('banner-bg');
 const avatarImg = document.getElementById('avatar-img');
 const bannerUpload = document.getElementById('banner-upload');
 const avatarUpload = document.getElementById('avatar-upload');
-const bannerBtn = document.getElementById('banner-btn');
-const avatarBtn = document.getElementById('avatar-btn');
 const bioInput = document.getElementById('bio-input');
 const saveBioBtn = document.getElementById('save-bio-btn');
 const displayUsername = document.getElementById('display-username');
@@ -47,21 +45,9 @@ function renderProfileData(data, email) {
     bioInput.value = data.bio || "";
     displayStatus.textContent = data.statusLevel || "Basic";
 
-    if (data.bannerUrl) {
-        bannerBg.style.backgroundImage = `url(${data.bannerUrl})`;
-    }
-    if (data.pfpUrl) {
-        avatarImg.style.backgroundImage = `url(${data.pfpUrl})`;
-    } else {
-        avatarImg.style.backgroundImage = `url('../Revoltchat.png')`;
-    }
-
-    if (!data.bannerChanged || data.statusLevel === "Premium") {
-        bannerBtn.style.display = "flex";
-    }
-    if (!data.pfpChanged || data.statusLevel === "Premium") {
-        avatarBtn.style.display = "flex";
-    }
+    if (data.bannerUrl) bannerBg.style.backgroundImage = `url(${data.bannerUrl})`;
+    if (data.pfpUrl) avatarImg.style.backgroundImage = `url(${data.pfpUrl})`;
+    else avatarImg.style.backgroundImage = `url('../Revoltchat.png')`;
 }
 
 async function loadUserProfile() {
@@ -109,9 +95,7 @@ saveBioBtn.addEventListener('click', async () => {
     if (!currentUser) return;
 
     try {
-        await updateDoc(doc(db, "users", currentUser.uid), {
-            bio: newBio
-        });
+        await updateDoc(doc(db, "users", currentUser.uid), { bio: newBio });
         
         const cacheKey = `revolt_profile_${currentUser.uid}`;
         const cachedData = sessionStorage.getItem(cacheKey);
@@ -163,22 +147,17 @@ bannerUpload.addEventListener('change', async (e) => {
 
     try {
         const base64Img = await resizeAndConvertImage(file, 800, 300);
-        await updateDoc(doc(db, "users", currentUser.uid), {
-            bannerUrl: base64Img,
-            bannerChanged: true
-        });
+        await updateDoc(doc(db, "users", currentUser.uid), { bannerUrl: base64Img });
 
         const cacheKey = `revolt_profile_${currentUser.uid}`;
         const cachedData = sessionStorage.getItem(cacheKey);
         if (cachedData) {
             const parsed = JSON.parse(cachedData);
             parsed.bannerUrl = base64Img;
-            parsed.bannerChanged = true;
             sessionStorage.setItem(cacheKey, JSON.stringify(parsed));
         }
 
         bannerBg.style.backgroundImage = `url(${base64Img})`;
-        bannerBtn.style.display = "none";
     } catch (err) {}
 });
 
@@ -188,21 +167,16 @@ avatarUpload.addEventListener('change', async (e) => {
 
     try {
         const base64Img = await resizeAndConvertImage(file, 200, 200);
-        await updateDoc(doc(db, "users", currentUser.uid), {
-            pfpUrl: base64Img,
-            pfpChanged: true
-        });
+        await updateDoc(doc(db, "users", currentUser.uid), { pfpUrl: base64Img });
 
         const cacheKey = `revolt_profile_${currentUser.uid}`;
         const cachedData = sessionStorage.getItem(cacheKey);
         if (cachedData) {
             const parsed = JSON.parse(cachedData);
             parsed.pfpUrl = base64Img;
-            parsed.pfpChanged = true;
             sessionStorage.setItem(cacheKey, JSON.stringify(parsed));
         }
 
         avatarImg.style.backgroundImage = `url(${base64Img})`;
-        avatarBtn.style.display = "none";
     } catch (err) {}
 });
