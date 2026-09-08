@@ -4,10 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REVOLT - Profile</title>
+    <script>
+        const savedTheme = localStorage.getItem('revolt_theme');
+        if (savedTheme && savedTheme !== 'default') {
+            document.documentElement.className = `theme-${savedTheme}`;
+        }
+    </script>
+    <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/profile.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
+    <div id="particles-js"></div>
+    
     <nav class="navbar">
         <div class="nav-left">
             <a href="../home.html" class="back-btn"><i data-lucide="arrow-left" size="20"></i></a>
@@ -19,7 +28,7 @@
     <div class="main-container">
         <div class="profile-card">
             <div class="banner-container" id="banner-bg">
-                <label for="banner-upload" id="banner-btn" class="upload-btn" style="display: none;">
+                <label for="banner-upload" id="banner-btn" class="upload-btn">
                     <i data-lucide="image" size="20"></i>
                 </label>
                 <input type="file" id="banner-upload" accept="image/png, image/jpeg" hidden>
@@ -28,7 +37,7 @@
             <div class="avatar-wrapper">
                 <div class="avatar-container">
                     <div id="avatar-img" style="background-image: url('../Revoltchat.png');"></div>
-                    <label for="avatar-upload" id="avatar-btn" class="upload-btn" style="display: none;">
+                    <label for="avatar-upload" id="avatar-btn" class="upload-btn">
                         <i data-lucide="camera" size="16"></i>
                     </label>
                     <input type="file" id="avatar-upload" accept="image/png, image/jpeg" hidden>
@@ -64,7 +73,9 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script type="module" src="../js/profile.js"></script>
+    <script type="module" src="../js/global.js"></script>
     <script>
         lucide.createIcons();
     </script>
