@@ -32,6 +32,8 @@ let currentUsername = "";
 let currentPfpUrl = defaultAvatar;
 let currentRoom = "General";
 let unsubscribe = null;
+let usersUnsubscribe = null;
+const userProfiles = {}; // Stores live profile data for all users (online or offline)
 
 if (sendButton) {
     sendButton.textContent = "R->";
@@ -68,6 +70,7 @@ onAuthStateChanged(auth, async (user) => {
         }
         
         setupPresence(db, currentUser);
+        listenToAllUserProfiles();
         loadMessages(currentRoom);
         initRevoltCounter(db, currentUser, revoltUsersList, userCountSpan);
     } else {
@@ -78,6 +81,18 @@ onAuthStateChanged(auth, async (user) => {
         }
     }
 });
+
+// Listen to all users so we always have their latest pfp/username whether they are online or offline
+function listenToAllUserProfiles() {
+    if (usersUnsubscribe) usersUnsubscribe();
+    usersUnsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
+        snapshot.forEach((docSnap) => {
+            userProfiles[docSnap.id] = docSnap.data();
+        });
+        // Reload messages if container is active to reflect any profile updates
+        if (currentRoom) loadMessages(currentRoom);
+    }, (error) => {});
+}
 
 roomElements.forEach(room => {
     room.addEventListener('click', (e) => {
@@ -93,7 +108,6 @@ function loadMessages(room) {
     if (unsubscribe) unsubscribe();
     if (!currentUser || !messagesContainer) return;
     
-    messagesContainer.innerHTML = '';
     const q = query(collection(db, "messages"), where("room", "==", room));
 
     unsubscribe = onSnapshot(q, (snapshot) => {
@@ -110,8 +124,11 @@ function loadMessages(room) {
 
         docs.forEach((data) => {
             const isSentByMe = currentUser && data.uid === currentUser.uid;
-            const senderName = data.username || "User";
-            const avatarSrc = data.pfpUrl || defaultAvatar;
+            
+            // Pull the latest info from our live userProfiles map, falling back to message data or defaults
+            const senderProfile = userProfiles[data.uid] || {};
+            const senderName = senderProfile.username || data.username || "User";
+            const avatarSrc = senderProfile.pfpUrl || data.pfpUrl || defaultAvatar;
             
             const wrapperDiv = document.createElement('div');
             wrapperDiv.className = `message-wrapper ${isSentByMe ? 'sent-wrapper' : 'received-wrapper'}`;
