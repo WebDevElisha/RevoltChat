@@ -1,3 +1,4 @@
+/* js/global.js */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
@@ -15,6 +16,23 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+function applyTheme(themeName) {
+    if (themeName && themeName !== 'default') {
+        document.documentElement.className = `theme-${themeName}`;
+    } else {
+        document.documentElement.className = '';
+    }
+}
+
+const savedTheme = localStorage.getItem('revolt_theme');
+applyTheme(savedTheme);
+
+window.updateAppTheme = function(themeName) {
+    localStorage.setItem('revolt_theme', themeName);
+    applyTheme(themeName);
+    loadParticles('on');
+};
 
 function loadParticles(status) {
     const pDiv = document.getElementById('particles-js');
@@ -65,15 +83,6 @@ function loadParticles(status) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const loadingScreen = document.getElementById('loading-screen');
-
-    function hideLoading() {
-        if (loadingScreen) {
-            loadingScreen.style.opacity = '0';
-            setTimeout(() => loadingScreen.style.display = 'none', 500);
-        }
-    }
-
     onAuthStateChanged(auth, async (user) => {
         const path = window.location.pathname;
         const isIndexPage = path.endsWith('/') || path.endsWith('/index.html');
@@ -84,19 +93,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            const cacheKey = `revolt_profile_${user.uid}`;
+            const cachedData = sessionStorage.getItem(cacheKey);
+
+            if (cachedData) {
+                try {
+                    const data = JSON.parse(cachedData);
+                    if (data.theme && data.theme !== savedTheme) {
+                        localStorage.setItem('revolt_theme', data.theme);
+                        applyTheme(data.theme);
+                    }
+                    setTimeout(() => loadParticles(data.particles || 'on'), 50);
+                    return;
+                } catch (e) {}
+            }
+
             try {
                 const userRef = doc(db, "users", user.uid);
                 const docSnap = await getDoc(userRef);
                 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    
+                    sessionStorage.setItem(cacheKey, JSON.stringify(data));
                     if (data.theme) {
                         localStorage.setItem('revolt_theme', data.theme);
-                        document.documentElement.className = data.theme !== 'default' ? `theme-${data.theme}` : '';
+                        applyTheme(data.theme);
                     }
-                    
-                    setTimeout(() => loadParticles(data.particles), 50);
+                    setTimeout(() => loadParticles(data.particles || 'on'), 50);
                 } else {
                     loadParticles('on');
                 }
@@ -110,10 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             loadParticles('on');
         }
-        hideLoading();
     });
-
-    setTimeout(hideLoading, 3000);
 });
 
 window.showNotification = function(message) {
@@ -140,4 +160,15 @@ window.showNotification = function(message) {
     popup.style.opacity = '1';
     
     setTimeout(() => popup.style.opacity = '0', 3000);
+};
+
+window.getCachedUserAvatar = function(uid) {
+    const cached = sessionStorage.getItem(`revolt_profile_${uid}`);
+    if (cached) {
+        try {
+            const data = JSON.parse(cached);
+            if (data.pfpUrl) return data.pfpUrl;
+        } catch(e) {}
+    }
+    return '../Revoltchat.png';
 };
