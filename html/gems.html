@@ -3,33 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revolt Chat - Gems</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/gems.css">
+    <title>Gems</title>
+    <script>
+        const savedTheme = localStorage.getItem('revolt_theme');
+        if (savedTheme && savedTheme !== 'default') {
+            document.documentElement.className = `theme-${savedTheme}`;
+        }
+    </script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            height: 100vh;
+        }
+
+        .gems-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 850px;
+            background: color-mix(in srgb, var(--bg-color) 70%, #000000);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 0 20px color-mix(in srgb, var(--border-color) 40%, transparent);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--border-color);
+            text-align: center;
+            font-size: 2.8rem;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px color-mix(in srgb, var(--border-color) 50%, transparent);
+        }
+
+        .gem-box {
+            background-color: color-mix(in srgb, var(--bg-color) 80%, #000);
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 0 15px color-mix(in srgb, var(--border-color) 30%, transparent);
+        }
+
+        #collect-btn {
+            background-color: color-mix(in srgb, var(--border-color) 20%, transparent);
+            color: var(--border-color);
+            border: 2px solid var(--border-color);
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px var(--border-color);
+            transition: all 0.2s ease;
+            margin-top: 15px;
+        }
+
+        #collect-btn:hover {
+            background-color: var(--border-color);
+            color: #000;
+            box-shadow: 0 0 20px var(--border-color);
+        }
+
+        #collect-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+    </style>
 </head>
 <body>
-    <div id="loading-screen">
-        <div class="spinner"></div>
-    </div>
-    
     <div id="particles-js"></div>
-    <div class="wave-bg"></div>
-    
-    <div class="top-nav-area">
-        <a href="../home.html" class="box-back-btn"><i data-lucide="arrow-left"></i></a>
-    </div>
 
-    <div class="page-container">
-        <div class="gems-board">
-            <h2>Daily Rewards</h2>
-            <div id="days-container" class="days-container"></div>
-            <button id="collect-btn" class="save-btn">Loading...</button>
+    <div class="gems-container">
+        <a href="../home.html" class="back-btn"><i data-lucide="arrow-left"></i> Back</a>
+        <h1>Gems</h1>
+        
+        <div class="gem-box">
+            <p id="gem-status" style="font-size: 1.2rem; margin-bottom: 15px; color: #fff;">Loading status...</p>
+            <button id="collect-btn">Collect Gems</button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
     <script type="module" src="../js/global.js"></script>
-    <script type="module" src="../js/gems.js"></script>
+    <script type="module">
+        import { getAuth } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+        import { getFirestore, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+        
+        const auth = getAuth();
+        const db = getFirestore();
+        const collectBtn = document.getElementById('collect-btn');
+        const gemStatus = document.getElementById('gem-status');
+
+        const COOLDOWN_HOURS = 3;
+
+        async function checkCooldown() {
+            if (!auth.currentUser) return;
+            
+            const lastCollected = localStorage.getItem(`last_gem_collection_${auth.currentUser.uid}`);
+            const now = new Date().getTime();
+
+            if (lastCollected) {
+                const elapsed = now - parseInt(lastCollected);
+                const cooldownMs = COOLDOWN_HOURS * 3600 * 1000;
+
+                if (elapsed < cooldownMs) {
+                    const timeLeftMs = cooldownMs - elapsed;
+                    const hoursLeft = Math.floor(timeLeftMs / (1000 * 60 * 60));
+                    const minutesLeft = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
+                    
+                    collectBtn.disabled = true;
+                    gemStatus.textContent = `Come back in ${hoursLeft}h ${minutesLeft}m to collect more gems!`;
+                    return;
+                }
+            }
+
+            collectBtn.disabled = false;
+            gemStatus.textContent = "Your gems are ready to collect!";
+        }
+
+        collectBtn.addEventListener('click', async () => {
+            if (!auth.currentUser) return;
+
+            try {
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                await updateDoc(userRef, {
+                    gems: increment(50)
+                });
+
+                const now = new Date().getTime();
+                localStorage.setItem(`last_gem_collection_${auth.currentUser.uid}`, now.toString());
+
+                if (window.showNotification) {
+                    window.showNotification("Successfully collected 50 gems!");
+                }
+
+                checkCooldown();
+            } catch (error) {
+                if (window.showNotification) {
+                    window.showNotification("Error collecting gems.");
+                }
+            }
+        });
+
+        setTimeout(checkCooldown, 1000);
+    </script>
 </body>
 </html>
