@@ -1,3 +1,4 @@
+/* js/global.js */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
@@ -171,5 +172,5 @@ window.getCachedUserAvatar = function(uid) {
             if (data.pfpUrl) return data.pfpUrl;
         } catch(e) {}
     }
-    return '../Revoltchat.png';
+    return 'Revoltchat.png';
 };
