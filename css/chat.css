@@ -1,19 +1,9 @@
-:root {
-    --bg-color: #000000;
-    --text-color: #ffffff;
-    --border-color: #e60000;
-    --header-bg: #0a0000;
-    --sidebar-bg: #050000;
-    --chat-bg: #000000;
-    --input-bg: #0a0000;
-}
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg-color);
-    color: var(--text-color);
+    color: #ffffff;
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -25,11 +15,12 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 15px 20px;
-    background-color: var(--header-bg);
+    background-color: color-mix(in srgb, var(--bg-color) 80%, #000);
     border-bottom: 1px solid var(--border-color);
-    box-shadow: 0 0 15px var(--border-color);
+    box-shadow: 0 0 15px color-mix(in srgb, var(--border-color) 40%, transparent);
     z-index: 10;
     height: 60px;
+    flex-shrink: 0;
 }
 
 .nav-title {
@@ -39,21 +30,6 @@ body {
     letter-spacing: 2px;
     text-shadow: 0 0 10px var(--border-color);
 }
-
-.nav-right { display: flex; gap: 15px; }
-
-.icon-btn {
-    color: var(--border-color);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s;
-}
-
-.icon-btn:hover { transform: scale(1.1); }
 
 .main-container {
     display: flex;
@@ -66,12 +42,12 @@ body {
 .sidebar {
     width: 250px;
     min-width: 250px;
-    background-color: var(--sidebar-bg);
+    background-color: color-mix(in srgb, var(--bg-color) 90%, #000);
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    box-shadow: 5px 0 15px rgba(230, 0, 0, 0.1);
     flex-shrink: 0;
+    height: 100%;
 }
 
 .rooms-list {
@@ -88,25 +64,22 @@ body {
     border-radius: 8px;
     cursor: pointer;
     border: 1px solid transparent;
-    transition: all 0.2s;
-    font-weight: bold;
     color: #aaa;
+    font-weight: bold;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .room:hover {
-    background-color: rgba(230, 0, 0, 0.1);
-    border-color: rgba(230, 0, 0, 0.3);
+    background-color: color-mix(in srgb, var(--border-color) 10%, transparent);
     color: #fff;
 }
 
 .room.active {
-    background-color: rgba(230, 0, 0, 0.15);
+    background-color: color-mix(in srgb, var(--border-color) 20%, transparent);
     border-color: var(--border-color);
     color: var(--border-color);
-    box-shadow: 0 0 10px rgba(230, 0, 0, 0.2);
 }
 
 .online-users {
@@ -121,8 +94,6 @@ body {
     margin-bottom: 10px;
     font-weight: bold;
     text-transform: uppercase;
-    display: flex;
-    justify-content: space-between;
 }
 
 .users-list {
@@ -133,11 +104,11 @@ body {
 }
 
 .users-list li {
-    padding: 5px 0;
+    padding: 4px 0;
+    color: #ccc;
     display: flex;
     align-items: center;
-    gap: 8px;
-    color: #ccc;
+    gap: 6px;
 }
 
 .chat-area {
@@ -145,9 +116,10 @@ body {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    background-color: var(--chat-bg);
+    background-color: var(--bg-color);
     position: relative;
     overflow: hidden;
+    height: 100%;
 }
 
 .messages-container {
@@ -164,25 +136,19 @@ body {
     align-items: flex-end;
     gap: 10px;
     max-width: 75%;
-    animation: fadeInUp 0.3s ease-out forwards;
 }
 
-.sent-wrapper {
-    align-self: flex-end;
-    flex-direction: row-reverse;
-}
-
-.received-wrapper {
-    align-self: flex-start;
-}
+.sent-wrapper { align-self: flex-end; flex-direction: row-reverse; }
+.received-wrapper { align-self: flex-start; }
 
 .chat-avatar {
     width: 35px;
     height: 35px;
     border-radius: 50%;
     border: 1px solid var(--border-color);
-    object-fit: cover;
-    background-color: #0a0000;
+    background-size: cover;
+    background-position: center;
+    background-color: #111;
     flex-shrink: 0;
 }
 
@@ -191,36 +157,28 @@ body {
     border-radius: 12px;
     word-wrap: break-word;
     border: 1px solid var(--border-color);
-    background-color: #000000;
-    box-shadow: 0 0 12px var(--border-color), inset 0 0 8px color-mix(in srgb, var(--border-color) 20%, transparent);
+    background-color: color-mix(in srgb, var(--bg-color) 50%, #000);
     color: #ffffff;
+    box-shadow: 0 0 10px color-mix(in srgb, var(--border-color) 30%, transparent);
 }
 
 .sent { border-bottom-right-radius: 2px; }
-
 .received { border-bottom-left-radius: 2px; }
 
 .message-info {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
     font-size: 0.75rem;
 }
 
-.sender-id {
-    font-weight: bold;
-    color: var(--border-color);
-}
-
-.message-text {
-    font-size: 0.95rem;
-    line-height: 1.4;
-}
+.sender-id { font-weight: bold; color: var(--border-color); }
+.message-text { font-size: 0.95rem; line-height: 1.4; }
 
 .input-area {
     padding: 15px 20px;
-    background-color: var(--input-bg);
+    background-color: color-mix(in srgb, var(--bg-color) 80%, #000);
     border-top: 1px solid var(--border-color);
     flex-shrink: 0;
 }
@@ -243,40 +201,26 @@ body {
     color: #fff;
     font-size: 1rem;
     outline: none;
-    transition: box-shadow 0.2s;
 }
 
-#message-input:focus { box-shadow: 0 0 10px rgba(230, 0, 0, 0.3); }
-#message-input::placeholder { color: #666; }
-
 #send-button {
-    background-color: transparent;
+    background-color: color-mix(in srgb, var(--border-color) 20%, transparent);
     color: var(--border-color);
     border: 1px solid var(--border-color);
     padding: 0 25px;
     border-radius: 25px;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.2s;
     text-transform: uppercase;
-    letter-spacing: 1px;
     flex-shrink: 0;
 }
 
 #send-button:hover {
     background-color: var(--border-color);
     color: #000;
-    box-shadow: 0 0 15px var(--border-color);
-}
-
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 768px) {
     .sidebar { width: 60px; min-width: 60px; }
     .room span, .online-users { display: none; }
-    .room { justify-content: center; padding: 15px 0; }
-    .message-wrapper { max-width: 90%; }
 }
