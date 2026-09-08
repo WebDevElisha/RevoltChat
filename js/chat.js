@@ -33,7 +33,27 @@ let currentPfpUrl = defaultAvatar;
 let currentRoom = "General";
 let unsubscribe = null;
 let usersUnsubscribe = null;
-const userProfiles = {}; // Stores live profile data for all users (online or offline)
+const userProfiles = {}; 
+
+// Inject CSS animation for message pop-up
+const styleSheet = document.createElement("style");
+styleSheet.type = "text/css";
+styleSheet.innerText = `
+@keyframes messagePopIn {
+    0% {
+        opacity: 0;
+        transform: translateY(15px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+.message-wrapper {
+    animation: messagePopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+`;
+document.head.appendChild(styleSheet);
 
 if (sendButton) {
     sendButton.textContent = "R->";
@@ -82,14 +102,12 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// Listen to all users so we always have their latest pfp/username whether they are online or offline
 function listenToAllUserProfiles() {
     if (usersUnsubscribe) usersUnsubscribe();
     usersUnsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
         snapshot.forEach((docSnap) => {
             userProfiles[docSnap.id] = docSnap.data();
         });
-        // Reload messages if container is active to reflect any profile updates
         if (currentRoom) loadMessages(currentRoom);
     }, (error) => {});
 }
@@ -125,7 +143,6 @@ function loadMessages(room) {
         docs.forEach((data) => {
             const isSentByMe = currentUser && data.uid === currentUser.uid;
             
-            // Pull the latest info from our live userProfiles map, falling back to message data or defaults
             const senderProfile = userProfiles[data.uid] || {};
             const senderName = senderProfile.username || data.username || "User";
             const avatarSrc = senderProfile.pfpUrl || data.pfpUrl || defaultAvatar;
