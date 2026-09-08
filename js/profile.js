@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getCountFromServer } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getCountFromServer, onSnapshot } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDWnr-9qpfzW_y-LMuTorItQTUHJVvhLDk",
@@ -28,21 +28,33 @@ const statMessages = document.getElementById('stat-messages');
 const statGems = document.getElementById('stat-gems');
 
 let currentUser = null;
+let msgUnsubscribe = null;
+let userUnsubscribe = null;
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
-        await loadUserProfile();
-        await loadMessageCount();
+        applyThemeFromStorage();
+        listenToUserProfile();
+        listenToMessageCount();
     } else {
         window.location.replace("../index.html");
     }
 });
 
-function renderProfileData(data, email) {
-    if (displayUsername) displayUsername.textContent = data.username || email.split('@')[0];
+function applyThemeFromStorage() {
+    const savedTheme = localStorage.getItem('revolt_theme');
+    if (savedTheme && savedTheme !== 'default') {
+        document.documentElement.className = `theme-${savedTheme}`;
+    } else {
+        document.documentElement.className = '';
+    }
+}
+
+function renderProfileData(data) {
+    if (displayUsername) displayUsername.textContent = data.username || "User";
     if (statGems) statGems.textContent = data.gems || 0;
-    if (bioInput) bioInput.value = data.bio || "";
+    if (bioInput && document.activeElement !== bioInput) bioInput.value = data.bio || "";
     if (displayStatus) displayStatus.textContent = data.statusLevel || "Basic";
 
     if (bannerBg && data.bannerUrl) {
@@ -52,58 +64,32 @@ function renderProfileData(data, email) {
         if (data.pfpUrl) {
             avatarImg.style.backgroundImage = `url(${data.pfpUrl})`;
         } else {
-            avatarImg.style.backgroundImage = `url('Revoltchat.png')`;
+            avatarImg.style.backgroundImage = `url('../Revoltchat.png')`;
         }
     }
 }
 
-async function loadUserProfile() {
-    try {
-        const cacheKey = `revolt_profile_${currentUser.uid}`;
-        const cachedData = sessionStorage.getItem(cacheKey);
-
-        if (cachedData) {
-            const parsed = JSON.parse(cachedData);
-            if (parsed.theme) {
-                localStorage.setItem('revolt_theme', parsed.theme);
-                if (window.updateAppTheme) window.updateAppTheme(parsed.theme);
-            }
-            renderProfileData(parsed, currentUser.email);
-            return;
-        }
-
-        const userRef = doc(db, "users", currentUser.uid);
-        const docSnap = await getDoc(userRef);
-
+function listenToUserProfile() {
+    const userRef = doc(db, "users", currentUser.uid);
+    userUnsubscribe = onSnapshot(userRef, (docSnap) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
-            sessionStorage.setItem(cacheKey, JSON.stringify(data));
             if (data.theme) {
                 localStorage.setItem('revolt_theme', data.theme);
-                if (window.updateAppTheme) window.updateAppTheme(data.theme);
+                applyThemeFromStorage();
             }
-            renderProfileData(data, currentUser.email);
+            renderProfileData(data);
         }
-    } catch (e) {}
+    });
 }
 
-async function loadMessageCount() {
-    try {
-        const cacheKey = `revolt_msg_count_${currentUser.uid}`;
-        const cachedCount = sessionStorage.getItem(cacheKey);
-
-        if (cachedCount !== null) {
-            if (statMessages) statMessages.textContent = cachedCount;
-            return;
+function listenToMessageCount() {
+    const q = query(collection(db, "messages"), where("uid", "==", currentUser.uid));
+    msgUnsubscribe = onSnapshot(q, (snapshot) => {
+        if (statMessages) {
+            statMessages.textContent = snapshot.size;
         }
-
-        const q = query(collection(db, "messages"), where("uid", "==", currentUser.uid));
-        const snapshot = await getCountFromServer(q);
-        const count = snapshot.data().count;
-
-        sessionStorage.setItem(cacheKey, count);
-        if (statMessages) statMessages.textContent = count;
-    } catch (e) {}
+    });
 }
 
 if (saveBioBtn) {
@@ -113,15 +99,6 @@ if (saveBioBtn) {
 
         try {
             await updateDoc(doc(db, "users", currentUser.uid), { bio: newBio });
-            
-            const cacheKey = `revolt_profile_${currentUser.uid}`;
-            const cachedData = sessionStorage.getItem(cacheKey);
-            if (cachedData) {
-                const parsed = JSON.parse(cachedData);
-                parsed.bio = newBio;
-                sessionStorage.setItem(cacheKey, JSON.stringify(parsed));
-            }
-
             saveBioBtn.textContent = "Saved!";
             setTimeout(() => saveBioBtn.textContent = "Save", 2000);
         } catch (e) {}
@@ -167,15 +144,6 @@ if (bannerUpload) {
         try {
             const base64Img = await resizeAndConvertImage(file, 800, 300);
             await updateDoc(doc(db, "users", currentUser.uid), { bannerUrl: base64Img });
-
-            const cacheKey = `revolt_profile_${currentUser.uid}`;
-            const cachedData = sessionStorage.getItem(cacheKey);
-            if (cachedData) {
-                const parsed = JSON.parse(cachedData);
-                parsed.bannerUrl = base64Img;
-                sessionStorage.setItem(cacheKey, JSON.stringify(parsed));
-            }
-
             if (bannerBg) bannerBg.style.backgroundImage = `url(${base64Img})`;
         } catch (err) {}
     });
@@ -189,15 +157,6 @@ if (avatarUpload) {
         try {
             const base64Img = await resizeAndConvertImage(file, 200, 200);
             await updateDoc(doc(db, "users", currentUser.uid), { pfpUrl: base64Img });
-
-            const cacheKey = `revolt_profile_${currentUser.uid}`;
-            const cachedData = sessionStorage.getItem(cacheKey);
-            if (cachedData) {
-                const parsed = JSON.parse(cachedData);
-                parsed.pfpUrl = base64Img;
-                sessionStorage.setItem(cacheKey, JSON.stringify(parsed));
-            }
-
             if (avatarImg) avatarImg.style.backgroundImage = `url(${base64Img})`;
         } catch (err) {}
     });
