@@ -35,13 +35,16 @@ if (sendButton) {
     sendButton.textContent = "R->";
 }
 
-window.addEventListener('beforeunload', () => {
+function setOfflineStatus() {
     if (currentUser) {
         updateDoc(doc(db, "users", currentUser.uid), {
             status: "offline"
         }).catch(() => {});
     }
-});
+}
+
+window.addEventListener('beforeunload', setOfflineStatus);
+window.addEventListener('pagehide', setOfflineStatus);
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -108,7 +111,7 @@ function loadRevolters() {
         snapshot.forEach((docSnap) => {
             count++;
             const userData = docSnap.data();
-            const displayName = userData.username || (userData.email ? userData.email.split('@')[0] : "User");
+            const displayName = userData.username || "User";
             const li = document.createElement('li');
             li.innerHTML = `<i data-lucide="user" size="16" style="color: var(--border-color);"></i> <span>${displayName}</span>`;
             revoltUsersList.appendChild(li);
