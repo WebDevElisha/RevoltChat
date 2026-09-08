@@ -3,13 +3,13 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDWnr-9qpfzW_y-LMuTorItQTUHJVvhLDk",
-  authDomain: "revolt-chat-4fada.firebaseapp.com",
-  databaseURL: "https://revolt-chat-4fada-default-rtdb.firebaseio.com/",
-  projectId: "revolt-chat-4fada",
-  storageBucket: "revolt-chat-4fada.firebasestorage.app",
-  messagingSenderId: "488624788181",
-  appId: "1:488624788181:web:1571ba31aafb8c1441c85c"
+    apiKey: "AIzaSyDWnr-9qpfzW_y-LMuTorItQTUHJVvhLDk",
+    authDomain: "revolt-chat-4fada.firebaseapp.com",
+    databaseURL: "https://revolt-chat-4fada-default-rtdb.firebaseio.com/",
+    projectId: "revolt-chat-4fada",
+    storageBucket: "revolt-chat-4fada.firebasestorage.app",
+    messagingSenderId: "488624788181",
+    appId: "1:488624788181:web:1571ba31aafb8c1441c85c"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -42,10 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                     }
                     
-                    if (data.particles !== undefined) {
-                        if (toggleParticles) toggleParticles.checked = data.particles !== 'off';
-                    } else {
-                        if (toggleParticles) toggleParticles.checked = true;
+                    if (toggleParticles) {
+                        toggleParticles.checked = data.particles !== 'off';
                     }
                 }
             } catch (error) {}
@@ -56,8 +54,23 @@ document.addEventListener('DOMContentLoaded', () => {
         box.addEventListener('click', () => {
             themeBoxes.forEach(b => b.classList.remove('selected'));
             box.classList.add('selected');
+            
+            const previewTheme = box.dataset.theme || 'default';
+            if (window.updateAppTheme) {
+                window.updateAppTheme(previewTheme, toggleParticles && toggleParticles.checked ? 'on' : 'off');
+            }
         });
     });
+
+    if (toggleParticles) {
+        toggleParticles.addEventListener('change', () => {
+            const selectedThemeBox = document.querySelector('.theme-box.selected');
+            const currentTheme = selectedThemeBox ? selectedThemeBox.dataset.theme : 'default';
+            if (window.updateAppTheme) {
+                window.updateAppTheme(currentTheme, toggleParticles.checked ? 'on' : 'off');
+            }
+        });
+    }
 
     if (saveBtn) {
         saveBtn.addEventListener('click', async () => {
@@ -74,20 +87,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     particles: particlesEnabled
                 });
                 
+                const cacheKey = `revolt_profile_${currentUid}`;
+                const cachedData = sessionStorage.getItem(cacheKey);
+                if (cachedData) {
+                    const parsed = JSON.parse(cachedData);
+                    parsed.theme = selectedTheme;
+                    parsed.particles = particlesEnabled;
+                    sessionStorage.setItem(cacheKey, JSON.stringify(parsed));
+                }
+
+                if (window.updateAppTheme) {
+                    window.updateAppTheme(selectedTheme, particlesEnabled);
+                }
+                
                 if (window.showNotification) {
-                    window.showNotification('Settings saved to cloud!');
-                }
-                
-                document.documentElement.className = '';
-                document.body.className = '';
-                if (selectedTheme !== 'default') {
-                    document.documentElement.classList.add(`theme-${selectedTheme}`);
-                    document.body.classList.add(`theme-${selectedTheme}`);
-                }
-                
-                const particlesDiv = document.getElementById('particles-js');
-                if (particlesDiv) {
-                    particlesDiv.style.display = particlesEnabled === 'off' ? 'none' : 'block';
+                    window.showNotification('Settings saved successfully!');
                 }
             } catch (error) {
                 if (window.showNotification) {
