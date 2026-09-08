@@ -17,21 +17,19 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 function applyTheme(themeName) {
-    if (themeName && themeName !== 'default' && themeName !== '') {
-        document.documentElement.className = `theme-${themeName}`;
-    } else {
-        document.documentElement.className = '';
-    }
+    const cleanTheme = (themeName && themeName !== 'default' && themeName !== '') ? themeName : '';
+    document.documentElement.className = cleanTheme ? `theme-${cleanTheme}` : '';
+    document.body.className = cleanTheme ? `theme-${cleanTheme}` : '';
 }
 
 const savedTheme = localStorage.getItem('revolt_theme') || 'default';
 applyTheme(savedTheme);
 
-window.updateAppTheme = function(themeName) {
+window.updateAppTheme = function(themeName, particlesStatus = 'on') {
     const finalTheme = themeName || 'default';
     localStorage.setItem('revolt_theme', finalTheme);
     applyTheme(finalTheme);
-    loadParticles('on');
+    loadParticles(particlesStatus);
 };
 
 function loadParticles(status) {
@@ -43,10 +41,14 @@ function loadParticles(status) {
         window.pJSDom = [];
     }
     pDiv.innerHTML = '';
+    
+    if (status === 'off') {
+        pDiv.style.display = 'none';
+        return;
+    }
+    pDiv.style.display = 'block';
 
-    if (status === 'off') return;
-
-    const rootStyles = getComputedStyle(document.body);
+    const rootStyles = getComputedStyle(document.documentElement);
     let particleColor = rootStyles.getPropertyValue('--particle-hex').trim().replace(/['"]/g, '');
     if (!particleColor) particleColor = "#ff0000";
 
@@ -59,24 +61,9 @@ function loadParticles(status) {
                 opacity: { value: 0.8, random: true },
                 size: { value: 4, random: true },
                 line_linked: { enable: false },
-                move: {
-                    enable: true,
-                    speed: 1.5,
-                    direction: "bottom",
-                    random: true,
-                    straight: false,
-                    out_mode: "out",
-                    bounce: false,
-                }
+                move: { enable: true, speed: 1.5, direction: "bottom", random: true, straight: false, out_mode: "out" }
             },
-            interactivity: {
-                detect_on: "canvas",
-                events: {
-                    onhover: { enable: false },
-                    onclick: { enable: false },
-                    resize: true
-                }
-            },
+            interactivity: { detect_on: "canvas", events: { resize: true } },
             retina_detect: true
         });
     }
@@ -156,10 +143,8 @@ window.showNotification = function(message) {
         popup.style.pointerEvents = 'none';
         document.body.appendChild(popup);
     }
-    
     popup.textContent = message;
     popup.style.opacity = '1';
-    
     setTimeout(() => popup.style.opacity = '0', 3000);
 };
 
