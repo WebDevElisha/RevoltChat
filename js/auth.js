@@ -87,6 +87,10 @@ authActionBtn.addEventListener('click', async () => {
                 authError.textContent = "Username is required for sign up.";
                 return;
             }
+            if (username.length > 20) {
+                authError.textContent = "Username must be 20 characters or less.";
+                return;
+            }
             
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
