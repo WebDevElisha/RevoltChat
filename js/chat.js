@@ -53,9 +53,10 @@ onAuthStateChanged(auth, async (user) => {
             const userDoc = await getDoc(userRef);
             
             if (userDoc.exists()) {
-                currentUsername = userDoc.data().username || fallbackName;
-                if (userDoc.data().pfpUrl) {
-                    currentPfpUrl = userDoc.data().pfpUrl;
+                const d = userDoc.data();
+                currentUsername = d.username || fallbackName;
+                if (d.pfpUrl) {
+                    currentPfpUrl = d.pfpUrl;
                 }
             } else {
                 currentUsername = fallbackName;
@@ -120,7 +121,7 @@ function loadRevolters() {
 
 function loadMessages(room) {
     if (unsubscribe) unsubscribe();
-    if (!currentUser) return;
+    if (!currentUser || !messagesContainer) return;
     
     messagesContainer.innerHTML = '';
     const q = query(collection(db, "messages"), where("room", "==", room));
@@ -160,6 +161,7 @@ function loadMessages(room) {
 }
 
 async function sendMessage() {
+    if (!messageInput) return;
     const text = messageInput.value.trim();
     if (!text || !currentUser) return;
     
