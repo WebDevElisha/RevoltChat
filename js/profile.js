@@ -36,7 +36,7 @@ onAuthStateChanged(auth, async (user) => {
         currentUser = user;
         applyThemeFromStorage();
         
-        // Immediate fallback render using session cache while Firestore loads
+        
         const cachedUsername = sessionStorage.getItem('revolt_temp_username');
         if (displayUsername && cachedUsername) {
             displayUsername.textContent = cachedUsername;
