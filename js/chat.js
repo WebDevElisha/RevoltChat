@@ -28,13 +28,12 @@ const userCountSpan = document.getElementById('user-count');
 const defaultAvatar = window.location.pathname.includes('/html/') ? "../Revoltchat.png" : "Revoltchat.png";
 
 let currentUser = null;
-let currentUsername = "";
+let currentUsername = "User";
 let currentPfpUrl = defaultAvatar;
 let currentRoom = "General";
 let unsubscribe = null;
 let usersUnsubscribe = null;
 const userProfiles = {}; 
-
 
 const styleSheet = document.createElement("style");
 styleSheet.type = "text/css";
@@ -62,7 +61,6 @@ if (sendButton) {
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
-        const fallbackName = user.email ? user.email.split('@')[0] : "User";
         
         try {
             const userRef = doc(db, "users", user.uid);
@@ -70,15 +68,22 @@ onAuthStateChanged(auth, async (user) => {
             
             if (userDoc.exists()) {
                 const d = userDoc.data();
-                currentUsername = d.username || fallbackName;
+               
+                if (d.username) {
+                    currentUsername = d.username;
+                } else {
+                    const cached = sessionStorage.getItem(`revolt_profile_${user.uid}`);
+                    if (cached) {
+                        const parsed = JSON.parse(cached);
+                        currentUsername = parsed.username || "User";
+                    }
+                }
+                
                 if (d.pfpUrl) {
                     currentPfpUrl = d.pfpUrl;
                 }
-            } else {
-                currentUsername = fallbackName;
             }
             
-           
             await setDoc(userRef, {
                 uid: user.uid,
                 email: user.email || "",
@@ -86,7 +91,7 @@ onAuthStateChanged(auth, async (user) => {
             }, { merge: true });
             
         } catch (e) {
-            currentUsername = fallbackName;
+            console.error("Error loading user profile in chat:", e);
         }
         
         setupPresence(db, currentUser);
@@ -97,7 +102,7 @@ onAuthStateChanged(auth, async (user) => {
         currentUser = null;
         const path = window.location.pathname;
         if (!path.endsWith('/') && !path.endsWith('/index.html')) {
-            window.location.replace("index.html");
+            window.location.replace("../index.html");
         }
     }
 });
@@ -107,6 +112,11 @@ function listenToAllUserProfiles() {
     usersUnsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
         snapshot.forEach((docSnap) => {
             userProfiles[docSnap.id] = docSnap.data();
+           
+            if (currentUser && docSnap.id === currentUser.uid) {
+                const data = docSnap.data();
+                if (data.username) currentUsername = data.username;
+            }
         });
         if (currentRoom) loadMessages(currentRoom);
     }, (error) => {});
