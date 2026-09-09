@@ -89,14 +89,13 @@ authActionBtn.addEventListener('click', async () => {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            
+           
             await setDoc(doc(db, "users", user.uid), {
                 username: username,
                 email: email,
                 status: "online"
-            });
+            }, { merge: true });
 
-           
             window.location.href = "home.html";
         }
     } catch (error) {
