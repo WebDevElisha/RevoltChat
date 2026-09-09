@@ -17,7 +17,8 @@ export function initRevoltCounter(db, currentUser, revoltUsersList, userCountSpa
         snapshot.forEach((docSnap) => {
             count++;
             const userData = docSnap.data();
-            const displayName = userData.username || "User";
+            const tempCache = sessionStorage.getItem('revolt_temp_username');
+            const displayName = userData.username || (docSnap.id === currentUser.uid ? tempCache : null) || "Unknown";
             const avatarSrc = userData.pfpUrl || defaultAvatar;
 
             const li = document.createElement('li');
