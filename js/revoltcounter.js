@@ -1,4 +1,4 @@
-import { collection, query, onSnapshot, where, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { collection, query, onSnapshot, where, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 let usersUnsubscribe = null;
 
@@ -18,7 +18,7 @@ export function initRevoltCounter(db, currentUser, revoltUsersList, userCountSpa
             count++;
             const userData = docSnap.data();
             const tempCache = sessionStorage.getItem('revolt_temp_username');
-            const displayName = userData.username || (docSnap.id === currentUser.uid ? tempCache : null) || "Unknown";
+            const displayName = userData.username || (docSnap.id === currentUser.uid ? (tempCache || currentUser.displayName) : null) || "Unknown";
             const avatarSrc = userData.pfpUrl || defaultAvatar;
 
             const li = document.createElement('li');
@@ -42,9 +42,9 @@ export function initRevoltCounter(db, currentUser, revoltUsersList, userCountSpa
 export function setupPresence(db, currentUser) {
     const setOfflineStatus = () => {
         if (currentUser) {
-            updateDoc(doc(db, "users", currentUser.uid), {
+            setDoc(doc(db, "users", currentUser.uid), {
                 status: "offline"
-            }).catch(() => {});
+            }, { merge: true }).catch(() => {});
         }
     };
 
@@ -55,9 +55,9 @@ export function setupPresence(db, currentUser) {
         if (document.visibilityState === 'hidden') {
             setOfflineStatus();
         } else if (document.visibilityState === 'visible' && currentUser) {
-            updateDoc(doc(db, "users", currentUser.uid), {
+            setDoc(doc(db, "users", currentUser.uid), {
                 status: "online"
-            }).catch(() => {});
+            }, { merge: true }).catch(() => {});
         }
     });
 }
