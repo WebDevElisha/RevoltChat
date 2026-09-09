@@ -35,6 +35,13 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
         applyThemeFromStorage();
+        
+        // Immediate fallback render using session cache while Firestore loads
+        const cachedUsername = sessionStorage.getItem('revolt_temp_username');
+        if (displayUsername && cachedUsername) {
+            displayUsername.textContent = cachedUsername;
+        }
+
         listenToUserProfile();
         listenToMessageCount();
     } else {
@@ -52,7 +59,10 @@ function applyThemeFromStorage() {
 }
 
 function renderProfileData(data) {
-    if (displayUsername) displayUsername.textContent = data.username || "User";
+    const cachedUsername = sessionStorage.getItem('revolt_temp_username');
+    if (displayUsername) {
+        displayUsername.textContent = data.username || cachedUsername || "User";
+    }
     if (statGems) statGems.textContent = data.gems || 0;
     if (bioInput && document.activeElement !== bioInput) bioInput.value = data.bio || "";
     if (displayStatus) displayStatus.textContent = data.statusLevel || "Basic";
