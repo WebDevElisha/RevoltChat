@@ -30,75 +30,83 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isLoginMode = false;
 
-    toggleMode.addEventListener('click', (e) => {
-        e.preventDefault(); 
-        isLoginMode = !isLoginMode;
-        
-        if (isLoginMode) {
-            authTitle.textContent = "Log In";
-            authSubtitle.textContent = "Welcome back to Revolt Chat.";
-            usernameGroup.style.display = "none";
-            authActionBtn.textContent = "Log In";
-            togglePrompt.textContent = "Don't have an account?";
-            toggleMode.textContent = "Sign up";
-        } else {
-            authTitle.textContent = "Sign Up";
-            authSubtitle.textContent = "Create an account to join Revolt Chat.";
-            usernameGroup.style.display = "block";
-            authActionBtn.textContent = "Create Account";
-            togglePrompt.textContent = "Already have an account?";
-            toggleMode.textContent = "Log in";
-        }
-        authError.textContent = "";
-    });
-
-    authActionBtn.addEventListener('click', async () => {
-        const email = emailInput ? emailInput.value.trim() : "";
-        const password = passwordInput ? passwordInput.value.trim() : "";
-        const username = usernameInput ? usernameInput.value.trim() : "";
-        
-        authError.textContent = "";
-
-        if (!email || !password) {
-            authError.textContent = "Email and password are required.";
-            return;
-        }
-
-        try {
+    if (toggleMode) {
+        toggleMode.addEventListener('click', (e) => {
+            e.preventDefault(); 
+            isLoginMode = !isLoginMode;
+            
             if (isLoginMode) {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                
-                await setDoc(doc(db, "users", user.uid), {
-                    status: "online"
-                }, { merge: true });
-
-                window.location.href = "home.html";
-                
+                authTitle.textContent = "Log In";
+                authSubtitle.textContent = "Welcome back to Revolt Chat.";
+                usernameGroup.style.display = "none";
+                authActionBtn.textContent = "Log In";
+                togglePrompt.textContent = "Don't have an account?";
+                toggleMode.textContent = "Sign up";
             } else {
-                if (!username) {
-                    authError.textContent = "Username is required for sign up.";
-                    return;
-                }
-                if (username.length > 20) {
-                    authError.textContent = "Username must be 20 characters or less.";
-                    return;
-                }
-                
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-              
-                await setDoc(doc(db, "users", user.uid), {
-                    username: username,
-                    email: email,
-                    status: "online"
-                }, { merge: true });
-
-                window.location.href = "home.html";
+                authTitle.textContent = "Sign Up";
+                authSubtitle.textContent = "Create an account to join Revolt Chat.";
+                usernameGroup.style.display = "block";
+                authActionBtn.textContent = "Create Account";
+                togglePrompt.textContent = "Already have an account?";
+                toggleMode.textContent = "Log in";
             }
-        } catch (error) {
-            authError.textContent = error.message.replace("Firebase: ", "");
-        }
-    });
+            authError.textContent = "";
+        });
+    }
+
+    if (authActionBtn) {
+        authActionBtn.addEventListener('click', async () => {
+            const email = emailInput ? emailInput.value.trim() : "";
+            const password = passwordInput ? passwordInput.value.trim() : "";
+            const username = usernameInput ? usernameInput.value.trim() : "";
+            
+            authError.textContent = "";
+
+            if (!email || !password) {
+                authError.textContent = "Email and password are required.";
+                return;
+            }
+
+            try {
+                if (isLoginMode) {
+                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+                    
+                    await setDoc(doc(db, "users", user.uid), {
+                        status: "online"
+                    }, { merge: true });
+
+                    window.location.href = "home.html";
+                    
+                } else {
+                    if (!username) {
+                        authError.textContent = "Username is required for sign up.";
+                        return;
+                    }
+                    if (username.length > 20) {
+                        authError.textContent = "Username must be 20 characters or less.";
+                        return;
+                    }
+                    
+            
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+
+                  
+                    await setDoc(doc(db, "users", user.uid), {
+                        uid: user.uid,
+                        username: username,
+                        email: email,
+                        status: "online",
+                        createdAt: new Date().toISOString()
+                    }, { merge: true });
+
+                    window.location.href = "home.html";
+                }
+            } catch (error) {
+               
+                authError.textContent = "Error: " + error.message.replace("Firebase: ", "");
+            }
+        });
+    }
 });
