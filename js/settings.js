@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDWnr-9qpfzW_y-LMuTorItQTUHJVvhLDk",
@@ -82,10 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             try {
                 const userRef = doc(db, "users", currentUid);
-                await updateDoc(userRef, {
+                await setDoc(userRef, {
                     theme: selectedTheme,
                     particles: particlesEnabled
-                });
+                }, { merge: true });
                 
                 const cacheKey = `revolt_profile_${currentUid}`;
                 const cachedData = sessionStorage.getItem(cacheKey);
