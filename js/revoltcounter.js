@@ -18,7 +18,8 @@ export function initRevoltCounter(db, currentUser, revoltUsersList, userCountSpa
             count++;
             const userData = docSnap.data();
             const tempCache = sessionStorage.getItem('revolt_temp_username');
-            const displayName = userData.username || (docSnap.id === currentUser.uid ? (tempCache || currentUser.displayName) : null) || "Unknown";
+            const fallbackName = (docSnap.id === currentUser.uid ? (tempCache || currentUser.displayName || currentUser.email?.split('@')[0]) : null) || userData.email?.split('@')[0] || "Unknown";
+            const displayName = userData.username || fallbackName;
             const avatarSrc = userData.pfpUrl || defaultAvatar;
 
             const li = document.createElement('li');
@@ -55,8 +56,10 @@ export function setupPresence(db, currentUser) {
         if (document.visibilityState === 'hidden') {
             setOfflineStatus();
         } else if (document.visibilityState === 'visible' && currentUser) {
+            const fallbackUsername = sessionStorage.getItem('revolt_temp_username') || currentUser.email?.split('@')[0] || "User";
             setDoc(doc(db, "users", currentUser.uid), {
-                status: "online"
+                status: "online",
+                username: fallbackUsername
             }, { merge: true }).catch(() => {});
         }
     });
