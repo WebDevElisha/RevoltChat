@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, collection, query, where, getCountFromServer, onSnapshot } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDWnr-9qpfzW_y-LMuTorItQTUHJVvhLDk",
@@ -38,7 +38,7 @@ onAuthStateChanged(auth, async (user) => {
         
         const cachedUsername = sessionStorage.getItem('revolt_temp_username');
         if (displayUsername) {
-            displayUsername.textContent = cachedUsername || user.displayName || "User";
+            displayUsername.textContent = cachedUsername || user.displayName || user.email?.split('@')[0] || "User";
         }
 
         listenToUserProfile();
@@ -59,8 +59,9 @@ function applyThemeFromStorage() {
 
 function renderProfileData(data) {
     const cachedUsername = sessionStorage.getItem('revolt_temp_username');
+    const fallbackName = cachedUsername || currentUser?.displayName || currentUser?.email?.split('@')[0] || "User";
     if (displayUsername) {
-        displayUsername.textContent = data.username || cachedUsername || currentUser?.displayName || "User";
+        displayUsername.textContent = data.username || fallbackName;
     }
     if (statGems) statGems.textContent = data.gems || 0;
     if (bioInput && document.activeElement !== bioInput) bioInput.value = data.bio || "";
@@ -81,17 +82,20 @@ function renderProfileData(data) {
 function listenToUserProfile() {
     const userRef = doc(db, "users", currentUser.uid);
     userUnsubscribe = onSnapshot(userRef, async (docSnap) => {
+        const cachedUsername = sessionStorage.getItem('revolt_temp_username') || currentUser.email?.split('@')[0] || "User";
         if (docSnap.exists()) {
             const data = docSnap.data();
+            if (!data.username) {
+                await setDoc(userRef, { username: cachedUsername }, { merge: true });
+                return;
+            }
             if (data.theme) {
                 localStorage.setItem('revolt_theme', data.theme);
                 applyThemeFromStorage();
             }
             renderProfileData(data);
         } else {
-            const cachedUsername = sessionStorage.getItem('revolt_temp_username');
-            const fallbackName = cachedUsername || currentUser.displayName || "User";
-            await setDoc(userRef, { username: fallbackName }, { merge: true });
+            await setDoc(userRef, { username: cachedUsername, status: "online" }, { merge: true });
         }
     });
 }
