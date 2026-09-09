@@ -16,89 +16,89 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const authTitle = document.getElementById('auth-title');
-const authSubtitle = document.getElementById('auth-subtitle');
-const usernameGroup = document.getElementById('username-group');
-const usernameInput = document.getElementById('username-input');
-const emailInput = document.getElementById('email-input');
-const passwordInput = document.getElementById('password-input');
-const authActionBtn = document.getElementById('auth-action-btn');
-const authError = document.getElementById('auth-error');
-const togglePrompt = document.getElementById('toggle-prompt');
-const toggleMode = document.getElementById('toggle-mode');
+document.addEventListener('DOMContentLoaded', () => {
+    const authTitle = document.getElementById('auth-title');
+    const authSubtitle = document.getElementById('auth-subtitle');
+    const usernameGroup = document.getElementById('username-group');
+    const usernameInput = document.getElementById('username-input');
+    const emailInput = document.getElementById('email-input');
+    const passwordInput = document.getElementById('password-input');
+    const authActionBtn = document.getElementById('auth-action-btn');
+    const authError = document.getElementById('auth-error');
+    const togglePrompt = document.getElementById('toggle-prompt');
+    const toggleMode = document.getElementById('toggle-mode');
 
-let isLoginMode = false;
+    let isLoginMode = false;
 
-toggleMode.addEventListener('click', (e) => {
-    e.preventDefault(); 
-    
-    isLoginMode = !isLoginMode;
-    
-    if (isLoginMode) {
-        authTitle.textContent = "Log In";
-        authSubtitle.textContent = "Welcome back to Revolt Chat.";
-        usernameGroup.style.display = "none";
-        authActionBtn.textContent = "Log In";
-        togglePrompt.textContent = "Don't have an account?";
-        toggleMode.textContent = "Sign up";
-    } else {
-        authTitle.textContent = "Sign Up";
-        authSubtitle.textContent = "Create an account to join Revolt Chat.";
-        usernameGroup.style.display = "block";
-        authActionBtn.textContent = "Create Account";
-        togglePrompt.textContent = "Already have an account?";
-        toggleMode.textContent = "Log in";
-    }
-    
-    authError.textContent = "";
-});
-
-authActionBtn.addEventListener('click', async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-    const username = usernameInput.value.trim();
-    
-    authError.textContent = "";
-
-    if (!email || !password) {
-        authError.textContent = "Email and password are required.";
-        return;
-    }
-
-    try {
+    toggleMode.addEventListener('click', (e) => {
+        e.preventDefault(); 
+        isLoginMode = !isLoginMode;
+        
         if (isLoginMode) {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            
-            await setDoc(doc(db, "users", user.uid), {
-                status: "online"
-            }, { merge: true });
-
-            window.location.href = "home.html";
-            
+            authTitle.textContent = "Log In";
+            authSubtitle.textContent = "Welcome back to Revolt Chat.";
+            usernameGroup.style.display = "none";
+            authActionBtn.textContent = "Log In";
+            togglePrompt.textContent = "Don't have an account?";
+            toggleMode.textContent = "Sign up";
         } else {
-            if (!username) {
-                authError.textContent = "Username is required for sign up.";
-                return;
-            }
-            if (username.length > 20) {
-                authError.textContent = "Username must be 20 characters or less.";
-                return;
-            }
-            
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-
-           
-            await setDoc(doc(db, "users", user.uid), {
-                username: username,
-                email: email,
-                status: "online"
-            }, { merge: true });
-
-            window.location.href = "home.html";
+            authTitle.textContent = "Sign Up";
+            authSubtitle.textContent = "Create an account to join Revolt Chat.";
+            usernameGroup.style.display = "block";
+            authActionBtn.textContent = "Create Account";
+            togglePrompt.textContent = "Already have an account?";
+            toggleMode.textContent = "Log in";
         }
-    } catch (error) {
-        authError.textContent = error.message.replace("Firebase: ", "");
-    }
+        authError.textContent = "";
+    });
+
+    authActionBtn.addEventListener('click', async () => {
+        const email = emailInput ? emailInput.value.trim() : "";
+        const password = passwordInput ? passwordInput.value.trim() : "";
+        const username = usernameInput ? usernameInput.value.trim() : "";
+        
+        authError.textContent = "";
+
+        if (!email || !password) {
+            authError.textContent = "Email and password are required.";
+            return;
+        }
+
+        try {
+            if (isLoginMode) {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                await setDoc(doc(db, "users", user.uid), {
+                    status: "online"
+                }, { merge: true });
+
+                window.location.href = "home.html";
+                
+            } else {
+                if (!username) {
+                    authError.textContent = "Username is required for sign up.";
+                    return;
+                }
+                if (username.length > 20) {
+                    authError.textContent = "Username must be 20 characters or less.";
+                    return;
+                }
+                
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+              
+                await setDoc(doc(db, "users", user.uid), {
+                    username: username,
+                    email: email,
+                    status: "online"
+                }, { merge: true });
+
+                window.location.href = "home.html";
+            }
+        } catch (error) {
+            authError.textContent = error.message.replace("Firebase: ", "");
+        }
+    });
 });
