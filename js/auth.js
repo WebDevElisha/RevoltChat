@@ -74,11 +74,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const userRef = doc(db, "users", user.uid);
                     const userSnap = await getDoc(userRef);
+                    let resolvedUsername = email.split('@')[0];
                     if (userSnap.exists() && userSnap.data().username) {
-                        sessionStorage.setItem('revolt_temp_username', userSnap.data().username);
+                        resolvedUsername = userSnap.data().username;
                     }
+                    
+                    sessionStorage.setItem('revolt_temp_username', resolvedUsername);
 
                     await setDoc(userRef, {
+                        username: resolvedUsername,
                         status: "online"
                     }, { merge: true });
 
