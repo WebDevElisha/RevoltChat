@@ -35,7 +35,7 @@ let unsubscribe = null;
 let usersUnsubscribe = null;
 const userProfiles = {}; 
 
-// Inject CSS animation for message pop-up
+
 const styleSheet = document.createElement("style");
 styleSheet.type = "text/css";
 styleSheet.innerText = `
@@ -78,10 +78,10 @@ onAuthStateChanged(auth, async (user) => {
                 currentUsername = fallbackName;
             }
             
+           
             await setDoc(userRef, {
                 uid: user.uid,
                 email: user.email || "",
-                username: currentUsername,
                 status: "online"
             }, { merge: true });
             
