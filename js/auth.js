@@ -88,11 +88,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         return;
                     }
                     
-            
+                    sessionStorage.setItem('revolt_temp_username', username);
+                    
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                     const user = userCredential.user;
 
-                  
                     await setDoc(doc(db, "users", user.uid), {
                         uid: user.uid,
                         username: username,
@@ -104,8 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.location.href = "home.html";
                 }
             } catch (error) {
-               
-                authError.textContent = "Error: " + error.message.replace("Firebase: ", "");
+                authError.textContent = error.message.replace("Firebase: ", "");
             }
         });
     }
