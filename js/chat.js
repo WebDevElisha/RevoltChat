@@ -28,7 +28,7 @@ const userCountSpan = document.getElementById('user-count');
 const defaultAvatar = window.location.pathname.includes('/html/') ? "../Revoltchat.png" : "Revoltchat.png";
 
 let currentUser = null;
-let currentUsername = "";
+let currentUsername = sessionStorage.getItem('revolt_temp_username') || "User";
 let currentPfpUrl = defaultAvatar;
 let currentRoom = "General";
 let unsubscribe = null;
@@ -76,7 +76,6 @@ onAuthStateChanged(auth, async (user) => {
                 }
             }
             
-            // Only update presence/status fields without touching the username
             await setDoc(userRef, {
                 uid: user.uid,
                 email: user.email || "",
@@ -149,7 +148,8 @@ function loadMessages(room) {
             const isSentByMe = currentUser && data.uid === currentUser.uid;
             
             const senderProfile = userProfiles[data.uid] || {};
-            const senderName = senderProfile.username || data.username || "Unknown";
+            const tempCache = (currentUser && data.uid === currentUser.uid) ? sessionStorage.getItem('revolt_temp_username') : null;
+            const senderName = senderProfile.username || data.username || tempCache || "User";
             const avatarSrc = senderProfile.pfpUrl || data.pfpUrl || defaultAvatar;
             
             const wrapperDiv = document.createElement('div');
@@ -181,7 +181,7 @@ async function sendMessage() {
             text: text,
             room: currentRoom,
             uid: currentUser.uid,
-            username: currentUsername,
+            username: currentUsername || sessionStorage.getItem('revolt_temp_username') || "User",
             pfpUrl: currentPfpUrl,
             createdAt: serverTimestamp()
         });
