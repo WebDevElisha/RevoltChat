@@ -79,12 +79,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const selectedThemeBox = document.querySelector('.theme-box.selected');
             const selectedTheme = selectedThemeBox ? selectedThemeBox.dataset.theme : 'default';
             const particlesEnabled = toggleParticles && toggleParticles.checked ? 'on' : 'off';
+            const cachedUsername = sessionStorage.getItem('revolt_temp_username') || auth.currentUser?.email?.split('@')[0] || "User";
             
             try {
                 const userRef = doc(db, "users", currentUid);
                 await setDoc(userRef, {
                     theme: selectedTheme,
-                    particles: particlesEnabled
+                    particles: particlesEnabled,
+                    username: cachedUsername
                 }, { merge: true });
                 
                 const cacheKey = `revolt_profile_${currentUid}`;
