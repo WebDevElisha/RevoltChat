@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getCountFromServer, onSnapshot } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, where, getCountFromServer, onSnapshot } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDWnr-9qpfzW_y-LMuTorItQTUHJVvhLDk",
@@ -36,10 +36,9 @@ onAuthStateChanged(auth, async (user) => {
         currentUser = user;
         applyThemeFromStorage();
         
-        
         const cachedUsername = sessionStorage.getItem('revolt_temp_username');
-        if (displayUsername && cachedUsername) {
-            displayUsername.textContent = cachedUsername;
+        if (displayUsername) {
+            displayUsername.textContent = cachedUsername || user.displayName || "User";
         }
 
         listenToUserProfile();
@@ -61,7 +60,7 @@ function applyThemeFromStorage() {
 function renderProfileData(data) {
     const cachedUsername = sessionStorage.getItem('revolt_temp_username');
     if (displayUsername) {
-        displayUsername.textContent = data.username || cachedUsername || "User";
+        displayUsername.textContent = data.username || cachedUsername || currentUser?.displayName || "User";
     }
     if (statGems) statGems.textContent = data.gems || 0;
     if (bioInput && document.activeElement !== bioInput) bioInput.value = data.bio || "";
@@ -81,7 +80,7 @@ function renderProfileData(data) {
 
 function listenToUserProfile() {
     const userRef = doc(db, "users", currentUser.uid);
-    userUnsubscribe = onSnapshot(userRef, (docSnap) => {
+    userUnsubscribe = onSnapshot(userRef, async (docSnap) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
             if (data.theme) {
@@ -89,6 +88,10 @@ function listenToUserProfile() {
                 applyThemeFromStorage();
             }
             renderProfileData(data);
+        } else {
+            const cachedUsername = sessionStorage.getItem('revolt_temp_username');
+            const fallbackName = cachedUsername || currentUser.displayName || "User";
+            await setDoc(userRef, { username: fallbackName }, { merge: true });
         }
     });
 }
@@ -108,7 +111,7 @@ if (saveBioBtn) {
         if (!currentUser) return;
 
         try {
-            await updateDoc(doc(db, "users", currentUser.uid), { bio: newBio });
+            await setDoc(doc(db, "users", currentUser.uid), { bio: newBio }, { merge: true });
             saveBioBtn.textContent = "Saved!";
             setTimeout(() => saveBioBtn.textContent = "Save", 2000);
         } catch (e) {}
@@ -153,7 +156,7 @@ if (bannerUpload) {
 
         try {
             const base64Img = await resizeAndConvertImage(file, 800, 300);
-            await updateDoc(doc(db, "users", currentUser.uid), { bannerUrl: base64Img });
+            await setDoc(doc(db, "users", currentUser.uid), { bannerUrl: base64Img }, { merge: true });
             if (bannerBg) bannerBg.style.backgroundImage = `url(${base64Img})`;
         } catch (err) {}
     });
@@ -166,7 +169,7 @@ if (avatarUpload) {
 
         try {
             const base64Img = await resizeAndConvertImage(file, 200, 200);
-            await updateDoc(doc(db, "users", currentUser.uid), { pfpUrl: base64Img });
+            await setDoc(doc(db, "users", currentUser.uid), { pfpUrl: base64Img }, { merge: true });
             if (avatarImg) avatarImg.style.backgroundImage = `url(${base64Img})`;
         } catch (err) {}
     });
