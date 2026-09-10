@@ -73,10 +73,37 @@
                 </div>
             </div>
         </div>
+
+        <div class="account-actions-container">
+            <div class="action-box">
+                <h3>Account Security</h3>
+                <div class="action-group">
+                    <input type="text" id="new-username-input" placeholder="New Username" maxlength="20">
+                    <button id="update-username-btn" class="action-btn">Change Username</button>
+                </div>
+                <div class="action-group">
+                    <input type="password" id="new-password-input" placeholder="New Password">
+                    <button id="update-password-btn" class="action-btn">Change Password</button>
+                </div>
+            </div>
+
+            <div class="action-box">
+                <h3>Session & Danger Zone</h3>
+                <div class="action-buttons-grid">
+                    <button id="logout-btn" class="action-btn secondary-btn">
+                        <i data-lucide="log-out" size="16"></i> Logout
+                    </button>
+                    <button id="delete-account-btn" class="action-btn danger-btn">
+                        <i data-lucide="user-x" size="16"></i> Delete Account
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script type="module" src="../js/profile.js"></script>
+    <script type="module" src="../js/logout.js"></script>
     <script type="module" src="../js/global.js"></script>
     <script>
         lucide.createIcons();
