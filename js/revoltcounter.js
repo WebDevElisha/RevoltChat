@@ -56,10 +56,8 @@ export function setupPresence(db, currentUser) {
         if (document.visibilityState === 'hidden') {
             setOfflineStatus();
         } else if (document.visibilityState === 'visible' && currentUser) {
-            const fallbackUsername = sessionStorage.getItem('revolt_temp_username') || currentUser.email?.split('@')[0] || "User";
             setDoc(doc(db, "users", currentUser.uid), {
-                status: "online",
-                username: fallbackUsername
+                status: "online"
             }, { merge: true }).catch(() => {});
         }
     });
