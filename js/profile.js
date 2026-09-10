@@ -82,19 +82,24 @@ function renderProfileData(data) {
 function listenToUserProfile() {
     const userRef = doc(db, "users", currentUser.uid);
     userUnsubscribe = onSnapshot(userRef, async (docSnap) => {
-        const cachedUsername = sessionStorage.getItem('revolt_temp_username') || currentUser.email?.split('@')[0] || "User";
         if (docSnap.exists()) {
             const data = docSnap.data();
-            if (!data.username) {
+            
+            if (data.username) {
+                sessionStorage.setItem('revolt_temp_username', data.username);
+            } else {
+                const cachedUsername = sessionStorage.getItem('revolt_temp_username') || currentUser.email?.split('@')[0] || "User";
                 await setDoc(userRef, { username: cachedUsername }, { merge: true });
                 return;
             }
+
             if (data.theme) {
                 localStorage.setItem('revolt_theme', data.theme);
                 applyThemeFromStorage();
             }
             renderProfileData(data);
         } else {
+            const cachedUsername = sessionStorage.getItem('revolt_temp_username') || currentUser.email?.split('@')[0] || "User";
             await setDoc(userRef, { username: cachedUsername, status: "online" }, { merge: true });
         }
     });
