@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, updatePassword, deleteUser, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, updateDoc, deleteDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDWnr-9qpfzW_y-LMuTorItQTUHJVvhLDk",
@@ -26,6 +26,11 @@ const displayUsername = document.getElementById('display-username');
 const displayStatus = document.getElementById('display-status');
 const statMessages = document.getElementById('stat-messages');
 const statGems = document.getElementById('stat-gems');
+
+const updateUsernameBtn = document.getElementById('update-username-btn');
+const updatePasswordBtn = document.getElementById('update-password-btn');
+const logoutBtn = document.getElementById('logout-btn');
+const deleteAccountBtn = document.getElementById('delete-account-btn');
 
 let currentUser = null;
 let msgUnsubscribe = null;
@@ -124,6 +129,82 @@ if (saveBioBtn) {
             saveBioBtn.textContent = "Saved!";
             setTimeout(() => saveBioBtn.textContent = "Save", 2000);
         } catch (e) {}
+    });
+}
+
+if (updateUsernameBtn) {
+    updateUsernameBtn.addEventListener('click', async () => {
+        const newUsernameInput = document.getElementById('new-username-input');
+        const newUsername = newUsernameInput.value.trim();
+        if (!newUsername) {
+            alert('Please enter a new username.');
+            return;
+        }
+        if (currentUser) {
+            try {
+                await updateDoc(doc(db, 'users', currentUser.uid), {
+                    username: newUsername
+                });
+                sessionStorage.setItem('revolt_temp_username', newUsername);
+                if (displayUsername) displayUsername.textContent = newUsername;
+                newUsernameInput.value = '';
+                alert('Username updated successfully!');
+            } catch (error) {
+                alert('Failed to update username: ' + error.message);
+            }
+        }
+    });
+}
+
+if (updatePasswordBtn) {
+    updatePasswordBtn.addEventListener('click', async () => {
+        const newPasswordInput = document.getElementById('new-password-input');
+        const newPassword = newPasswordInput.value;
+        if (!newPassword || newPassword.length < 6) {
+            alert('Password must be at least 6 characters long.');
+            return;
+        }
+        if (currentUser) {
+            try {
+                await updatePassword(currentUser, newPassword);
+                newPasswordInput.value = '';
+                alert('Password updated successfully!');
+            } catch (error) {
+                alert('Failed to update password. Please re-authenticate and try again.');
+            }
+        }
+    });
+}
+
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+        try {
+            await signOut(auth);
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = '../index.html';
+        } catch (error) {
+            alert('Failed to log out.');
+        }
+    });
+}
+
+if (deleteAccountBtn) {
+    deleteAccountBtn.addEventListener('click', async () => {
+        const confirmDelete = confirm('Are you sure you want to delete your account? This action cannot be undone.');
+        if (!confirmDelete) return;
+
+        if (currentUser) {
+            try {
+                await deleteDoc(doc(db, 'users', currentUser.uid));
+                await deleteUser(currentUser);
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = '../index.html';
+            } catch (error) {
+                alert('Failed to delete account. Please re-authenticate and try again.');
+            }
+        }
     });
 }
 
