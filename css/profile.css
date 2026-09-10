@@ -58,11 +58,11 @@ body {
     align-items: center;
     gap: 25px;
     width: 100%;
-    max-width: 850px; 
+    max-width: 850px;
     margin: 0 auto;
 }
 
-.profile-card {
+.profile-card, .stats-card, .action-box {
     width: 100%;
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -111,7 +111,7 @@ body {
 
 .banner-container {
     width: 100%;
-    height: 180px; 
+    height: 180px;
     background-color: #111;
     background-size: cover;
     background-position: center;
@@ -226,10 +226,13 @@ body {
 }
 
 .stats-card {
-    width: 100%;
     display: flex;
     flex-direction: row;
     gap: 20px;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    border: none;
 }
 
 .stat-box {
@@ -245,18 +248,105 @@ body {
 }
 
 .stat-icon { color: var(--border-color); flex-shrink: 0; }
-
 .stat-data { display: flex; flex-direction: column; }
+.stat-value { font-size: 1.4rem; font-weight: 900; color: #fff; }
+.stat-label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
 
-.stat-value {
-    font-size: 1.4rem;
-    font-weight: 900;
-    color: #fff;
+.account-actions-container {
+    width: 100%;
+    display: flex;
+    gap: 20px;
 }
 
-.stat-label {
-    font-size: 0.8rem;
-    color: #888;
+.action-box {
+    flex: 1;
+}
+
+.action-box h3 {
+    color: var(--border-color);
+    font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.action-group {
+    display: flex;
+    gap: 10px;
+}
+
+.action-group input {
+    flex: 1;
+    background-color: #000;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #fff;
+    padding: 8px 12px;
+    font-family: inherit;
+}
+
+.action-group input:focus {
+    outline: none;
+    border-color: var(--border-color);
+}
+
+.action-btn {
+    background-color: #000;
+    color: var(--border-color);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background-color: var(--border-color);
+    color: #000;
+    box-shadow: 0 0 10px var(--border-color);
+}
+
+.action-buttons-grid {
+    display: flex;
+    gap: 10px;
+}
+
+.action-buttons-grid .action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.secondary-btn {
+    border-color: #555;
+    color: #bbb;
+}
+
+.secondary-btn:hover {
+    background-color: #555;
+    color: #fff;
+    box-shadow: 0 0 10px #555;
+}
+
+.danger-btn {
+    border-color: #ff3333;
+    color: #ff3333;
+}
+
+.danger-btn:hover {
+    background-color: #ff3333;
+    color: #000;
+    box-shadow: 0 0 15px #ff3333;
+}
+
+@media (max-width: 768px) {
+    .account-actions-container {
+        flex-direction: column;
+    }
+    .stats-card {
+        flex-direction: column;
+    }
 }
