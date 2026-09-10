@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RevoltChat - Temporarily Down</title>
+    <style>
+        :root {
+            --bg-color: #0f111a;
+            --panel-bg: #181b26;
+            --text-main: #ffffff;
+            --text-muted: #8b92a5;
+            --accent-glow: rgba(255, 87, 34, 0.35);
+            --accent-color: #ff5722;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+            background-size: 32px 32px;
+            z-index: 1;
+        }
+
+        .downtime-container {
+            position: relative;
+            z-index: 2;
+            max-width: 520px;
+            width: 90%;
+            padding: 45px 35px;
+            background: var(--panel-bg);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 35px var(--accent-glow);
+            text-align: center;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background: rgba(255, 87, 34, 0.12);
+            color: var(--accent-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 22px;
+            border: 1px solid rgba(255, 87, 34, 0.25);
+        }
+
+        h1 {
+            font-size: 30px;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0 0 15px 0;
+            line-height: 1.25;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.08);
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.6;
+            margin: 0 0 30px 0;
+        }
+
+        .loader {
+            width: 28px;
+            height: 28px;
+            border: 3px solid rgba(255, 255, 255, 0.08);
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-text {
+            margin-top: 15px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="downtime-container">
+        <div class="status-badge">Notice</div>
+        <h1>RevoltChat is down temporarily</h1>
+        <p>Check back at midnight pacific time. No data will be lost, everything will be intact.</p>
+        
+        <div class="loader" id="loader"></div>
+        <div class="status-text" id="status-text">Verifying connection...</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDWnr-9qpfzW_y-LMuTorItQTUHJVvhLDk",
+            authDomain: "revolt-chat-4fada.firebaseapp.com",
+            databaseURL: "https://revolt-chat-4fada-default-rtdb.firebaseio.com/",
+            projectId: "revolt-chat-4fada",
+            storageBucket: "revolt-chat-4fada.firebasestorage.app",
+            messagingSenderId: "488624788181",
+            appId: "1:488624788181:web:1571ba31aafb8c1441c85c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const statusText = document.getElementById('status-text');
+        const loader = document.getElementById('loader');
+
+        async function verifyStatus() {
+            try {
+                await getDoc(doc(db, "system", "health"));
+                localStorage.removeItem('revolt_is_down');
+                statusText.textContent = "System online! Returning to app...";
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 2000);
+            } catch (error) {
+                if (error.code === 'resource-exhausted' || error.message?.includes('Quota exceeded')) {
+                    localStorage.setItem('revolt_is_down', 'true');
+                    statusText.textContent = "Quota limit reached. Offline mode active.";
+                    loader.style.display = 'none';
+                } else if (error.code === 'not-found' || error.code === 'permission-denied') {
+                    localStorage.removeItem('revolt_is_down');
+                    statusText.textContent = "System online! Returning to app...";
+                    setTimeout(() => {
+                        window.location.href = "index.html";
+                    }, 2000);
+                } else {
+                    localStorage.setItem('revolt_is_down', 'true');
+                    statusText.textContent = "Offline mode active.";
+                    loader.style.display = 'none';
+                }
+            }
+        }
+
+        verifyStatus();
+    </script>
+</body>
+</html>
