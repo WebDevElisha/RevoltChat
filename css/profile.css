@@ -52,13 +52,13 @@ body {
 }
 
 .main-container {
-    padding: 30px 20px;
+    padding: 40px 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 25px;
     width: 100%;
-    max-width: 600px;
+    max-width: 850px; 
     margin: 0 auto;
 }
 
@@ -71,8 +71,8 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    padding: 20px;
-    gap: 15px;
+    padding: 25px;
+    gap: 20px;
 }
 
 .profile-top-info {
@@ -83,7 +83,7 @@ body {
 }
 
 #display-username {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     font-weight: 900;
     color: #ffffff;
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
@@ -94,9 +94,9 @@ body {
     background-color: transparent;
     border: 1px solid var(--border-color);
     color: var(--border-color);
-    padding: 4px 10px;
-    border-radius: 10px;
-    font-size: 0.75rem;
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-size: 0.8rem;
     font-weight: bold;
     text-transform: uppercase;
     box-shadow: 0 0 5px var(--border-color);
@@ -111,25 +111,25 @@ body {
 
 .banner-container {
     width: 100%;
-    height: 130px;
+    height: 180px; 
     background-color: #111;
     background-size: cover;
     background-position: center;
     border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border-radius: 14px;
     position: relative;
 }
 
 .avatar-container {
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
-    border: 2px solid var(--border-color);
+    border: 3px solid var(--border-color);
     background-color: #1a1a1a;
-    box-shadow: 0 0 10px var(--border-color);
+    box-shadow: 0 0 12px var(--border-color);
     position: absolute;
-    bottom: -15px;
-    left: 20px;
+    bottom: -20px;
+    left: 25px;
     z-index: 2;
 }
 
@@ -157,8 +157,8 @@ body {
 }
 
 .banner-container .upload-btn {
-    bottom: 8px;
-    right: 8px;
+    bottom: 10px;
+    right: 10px;
 }
 
 .avatar-container .upload-btn {
@@ -176,25 +176,25 @@ body {
     width: 100%;
     display: flex;
     flex-direction: column;
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
 .bio-section {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     align-items: center;
 }
 
 #bio-input {
     width: 100%;
-    height: 55px;
+    height: 70px;
     background-color: #000;
     border: 1px solid #333;
-    border-radius: 10px;
+    border-radius: 12px;
     color: #fff;
-    padding: 10px;
+    padding: 12px;
     resize: none;
     text-align: center;
     font-family: inherit;
@@ -211,7 +211,7 @@ body {
     background-color: #000;
     color: var(--border-color);
     border: 1px solid var(--border-color);
-    padding: 6px 20px;
+    padding: 8px 25px;
     border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
@@ -229,15 +229,15 @@ body {
     width: 100%;
     display: flex;
     flex-direction: row;
-    gap: 15px;
+    gap: 20px;
 }
 
 .stat-box {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 15px;
+    gap: 15px;
+    padding: 15px 20px;
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 16px;
@@ -249,13 +249,13 @@ body {
 .stat-data { display: flex; flex-direction: column; }
 
 .stat-value {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     font-weight: 900;
     color: #fff;
 }
 
 .stat-label {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: #888;
     text-transform: uppercase;
     letter-spacing: 1px;
