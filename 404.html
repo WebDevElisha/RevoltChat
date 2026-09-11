@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REVOLT - 404 Not Found</title>
     <script>
+        if (localStorage.getItem('revolt_is_down') === 'true') {
+            const segments = window.location.pathname.split('/').filter(Boolean);
+            const base = window.location.hostname.endsWith('github.io') && segments.length > 0 ? `/${segments[0]}/` : '/';
+            if (!window.location.pathname.includes('downtime.html')) window.location.replace(base + 'downtime.html');
+        }
+
         const savedTheme = localStorage.getItem('revolt_theme');
         if (savedTheme && savedTheme !== 'default') {
             document.documentElement.className = `theme-${savedTheme}`;
