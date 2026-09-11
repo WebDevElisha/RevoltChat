@@ -135,34 +135,43 @@
         const statusText = document.getElementById('status-text');
         const loader = document.getElementById('loader');
 
+        let isRedirecting = false;
+
         async function verifyStatus() {
+            if (isRedirecting) return;
+
             try {
                 await getDoc(doc(db, "system", "health"));
+                isRedirecting = true;
                 localStorage.removeItem('revolt_is_down');
                 statusText.textContent = "System online! Returning to app...";
+                loader.style.display = 'block';
                 setTimeout(() => {
                     window.location.href = "index.html";
                 }, 2000);
             } catch (error) {
                 if (error.code === 'resource-exhausted' || error.message?.includes('Quota exceeded')) {
                     localStorage.setItem('revolt_is_down', 'true');
-                    statusText.textContent = "Quota limit reached. Offline mode active.";
+                    statusText.textContent = "Quota limit reached. Retrying automatically...";
                     loader.style.display = 'none';
                 } else if (error.code === 'not-found' || error.code === 'permission-denied') {
+                    isRedirecting = true;
                     localStorage.removeItem('revolt_is_down');
                     statusText.textContent = "System online! Returning to app...";
+                    loader.style.display = 'block';
                     setTimeout(() => {
                         window.location.href = "index.html";
                     }, 2000);
                 } else {
                     localStorage.setItem('revolt_is_down', 'true');
-                    statusText.textContent = "Offline mode active.";
+                    statusText.textContent = "Offline mode active. Retrying automatically...";
                     loader.style.display = 'none';
                 }
             }
         }
 
         verifyStatus();
+        setInterval(verifyStatus, 10000);
     </script>
 </body>
 </html>
