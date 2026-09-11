@@ -1,3 +1,9 @@
+if (localStorage.getItem('revolt_is_down') === 'true') {
+    const segments = window.location.pathname.split('/').filter(Boolean);
+    const base = window.location.hostname.endsWith('github.io') && segments.length > 0 ? `/${segments[0]}/` : '/';
+    if (!window.location.pathname.includes('downtime.html')) window.location.replace(base + 'downtime.html');
+}
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
@@ -21,7 +27,6 @@ function applyTheme(themeName) {
     document.documentElement.className = cleanTheme ? `theme-${cleanTheme}` : '';
     document.body.className = cleanTheme ? `theme-${cleanTheme}` : '';
 }
-
 
 const savedTheme = localStorage.getItem('revolt_theme') || 'default';
 applyTheme(savedTheme);
@@ -91,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     sessionStorage.setItem(cacheKey, JSON.stringify(data));
-                    
                     
                     if (!activeTheme || activeTheme === 'default') {
                         activeTheme = data.theme || 'default';
