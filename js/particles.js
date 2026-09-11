@@ -1,3 +1,9 @@
+if (localStorage.getItem('revolt_is_down') === 'true') {
+    const segments = window.location.pathname.split('/').filter(Boolean);
+    const base = window.location.hostname.endsWith('github.io') && segments.length > 0 ? `/${segments[0]}/` : '/';
+    if (!window.location.pathname.includes('downtime.html')) window.location.replace(base + 'downtime.html');
+}
+
 (function () {
     const canvas = document.getElementById('snow-canvas');
     if (!canvas) return;
