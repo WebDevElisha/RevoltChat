@@ -1,3 +1,9 @@
+if (localStorage.getItem('revolt_is_down') === 'true') {
+    const segments = window.location.pathname.split('/').filter(Boolean);
+    const base = window.location.hostname.endsWith('github.io') && segments.length > 0 ? `/${segments[0]}/` : '/';
+    if (!window.location.pathname.includes('downtime.html')) window.location.replace(base + 'downtime.html');
+}
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
